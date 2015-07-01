@@ -1,0 +1,7 @@
+development:
+  driver: postgres
+  open: user=guestimator_dev dbname=guestimator_dev sslmode=disable
+
+test:
+  driver: postgres
+  open: user=guestimator_test dbname=guestimator_test sslmode=disable
