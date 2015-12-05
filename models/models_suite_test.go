@@ -25,3 +25,11 @@ var _ = AfterSuite(func() {
 	err := DB.Close()
 	Expect(err).NotTo(HaveOccurred())
 })
+
+var _ = BeforeEach(func() {
+	_, err := DB.Exec("DELETE FROM questions;")
+	Expect(err).NotTo(HaveOccurred())
+
+	_, err = DB.Exec("DELETE FROM wiki_pages;")
+	Expect(err).NotTo(HaveOccurred())
+})

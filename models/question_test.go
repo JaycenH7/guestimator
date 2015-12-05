@@ -10,14 +10,25 @@ import (
 var _ = Describe("Question", func() {
 
 	Describe("Creating a question", func() {
-		var question Question
+		var (
+			wiki     WikiPage
+			question Question
+		)
 
 		BeforeEach(func() {
+			wiki = WikiPage{
+				PageID: 1,
+				Title:  "My WikiPage",
+			}
+			err := CreateWikiPage(DB, &wiki)
+			Expect(err).NotTo(HaveOccurred())
+
 			question = Question{
 				FullText:  "42 has 2 digits",
 				Positions: []int{0, 7},
+				PageID:    wiki.PageID,
 			}
-			err := CreateQuestion(DB, &question)
+			err = CreateQuestion(DB, &question)
 			Expect(err).NotTo(HaveOccurred())
 			Expect(question.Id).NotTo(BeZero())
 		})
