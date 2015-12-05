@@ -40,3 +40,29 @@ func GetWikiPage(db *pg.DB, page_id int) (*WikiPage, error) {
 	_, err := db.QueryOne(w, `SELECT * FROM wiki_pages WHERE page_id = ?`, page_id)
 	return w, err
 }
+
+func (w *WikiPage) ExtractQuestions() []Question {
+	questions := make([]Question, 0)
+	for _, sentence := range w.extractSentences() {
+		if q := ParseQuestion(sentence); q != nil {
+			q.PageID = w.PageID
+			questions = append(questions, *q)
+		}
+	}
+	return questions
+}
+
+func (w WikiPage) extractSentences() []string {
+	sentences := make([]string, 0)
+
+	i, start := 0, 0
+	for _, c := range w.Extract {
+		if c == '.' {
+			sentences = append(sentences, w.Extract[start:i+1])
+			start++
+		}
+		i++
+	}
+
+	return sentences
+}

@@ -28,4 +28,34 @@ var _ = Describe("WikiPage", func() {
 			Expect(res).To(Equal(&wiki))
 		})
 	})
+
+	Describe("Extracting questions out of a wiki page", func() {
+		var (
+			wiki      WikiPage
+			questions []Question
+		)
+
+		BeforeEach(func() {
+			wiki = WikiPage{
+				PageID:  1,
+				Title:   "My WikiPage",
+				Extract: "",
+			}
+		})
+
+		Describe("Simple sentence", func() {
+			BeforeEach(func() {
+				wiki.Extract = "He is 42 years old."
+				questions = wiki.ExtractQuestions()
+			})
+
+			It("should extract the question correctly", func() {
+				Expect(questions).To(HaveLen(1))
+				q := questions[0]
+				Expect(q.FullText).To(Equal(wiki.Extract))
+				Expect(q.Positions).To(Equal([]int{6, 7}))
+				Expect(q.PageID).To(Equal(wiki.PageID))
+			})
+		})
+	})
 })
