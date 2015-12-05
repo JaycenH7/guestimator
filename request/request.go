@@ -7,19 +7,19 @@ import (
 	"github.com/mrap/guestimator/models"
 )
 
-type PagesMap map[string]models.WikiPage
+type pagesMap map[string]models.WikiPage
 
-func (m PagesMap) IsEmpty() bool {
+func (m pagesMap) isEmpty() bool {
 	_, hasKey := m["-1"]
 	return hasKey
 }
 
-type WikiQuery struct {
-	Pages PagesMap `json:"pages"`
+type wikiQuery struct {
+	Pages pagesMap `json:"pages"`
 }
 
-type QueryResponse struct {
-	Query WikiQuery `json:"query"`
+type queryResponse struct {
+	Query wikiQuery `json:"query"`
 }
 
 func GetWikiPage(title string) (*models.WikiPage, error) {
@@ -29,13 +29,13 @@ func GetWikiPage(title string) (*models.WikiPage, error) {
 	}
 
 	decoder := json.NewDecoder(res.Body)
-	var queryRes QueryResponse
+	var queryRes queryResponse
 	if err = decoder.Decode(&queryRes); err != nil {
 		return nil, err
 	}
 
 	pages := queryRes.Query.Pages
-	if pages.IsEmpty() {
+	if pages.isEmpty() {
 		return nil, nil
 	}
 
