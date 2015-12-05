@@ -1,7 +1,8 @@
-package wikipage_test
+package request_test
 
 import (
-	. "github.com/mrap/guestimator/wikipage"
+	"github.com/mrap/guestimator/models"
+	. "github.com/mrap/guestimator/request"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
@@ -11,7 +12,7 @@ var _ = Describe("Requests", func() {
 	Describe("Requesting for a WikiPage", func() {
 		var (
 			err  error
-			page *WikiPage
+			page *models.WikiPage
 		)
 
 		Context("When the wikipage does exist", func() {

@@ -1,16 +1,29 @@
-package wikipage
+package request
 
 import (
 	"encoding/json"
 	"net/http"
+
+	"github.com/mrap/guestimator/models"
 )
+
+type PagesMap map[string]models.WikiPage
+
+func (m PagesMap) IsEmpty() bool {
+	_, hasKey := m["-1"]
+	return hasKey
+}
+
+type WikiQuery struct {
+	Pages PagesMap `json:"pages"`
+}
 
 type QueryResponse struct {
 	Query WikiQuery `json:"query"`
 }
 
-func GetWikiPage(title string) (*WikiPage, error) {
-	res, err := http.Get(WikiPageUrl(title))
+func GetWikiPage(title string) (*models.WikiPage, error) {
+	res, err := http.Get(models.WikiPageUrl(title))
 	if err != nil {
 		return nil, err
 	}
@@ -26,7 +39,7 @@ func GetWikiPage(title string) (*WikiPage, error) {
 		return nil, nil
 	}
 
-	var page WikiPage
+	var page models.WikiPage
 	for _, v := range queryRes.Query.Pages {
 		page = v
 		break
