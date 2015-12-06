@@ -55,11 +55,15 @@ func (w *WikiPage) ExtractQuestions() []Question {
 func (w WikiPage) extractSentences() []string {
 	sentences := make([]string, 0)
 
-	i, start := 0, 0
+	i, start := 0, -1
 	for _, c := range w.Extract {
-		if c == '.' {
+		if start == -1 {
+			if c != ' ' {
+				start = i
+			}
+		} else if c == '.' {
 			sentences = append(sentences, w.Extract[start:i+1])
-			start++
+			start = -1
 		}
 		i++
 	}
