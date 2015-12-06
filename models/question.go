@@ -35,9 +35,12 @@ func ParseQuestion(s string) *Question {
 				start = i
 			}
 		} else if !isDigit {
-			return &Question{
-				FullText:  s,
-				Positions: []int{start, i - 1},
+			// Capture decimals too
+			if !(c == '.' && i < len(s)-1 && runeIsDigit(rune(s[i+1]))) {
+				return &Question{
+					FullText:  s,
+					Positions: []int{start, i - 1},
+				}
 			}
 		}
 		i++

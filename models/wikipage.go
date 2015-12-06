@@ -62,8 +62,10 @@ func (w WikiPage) extractSentences() []string {
 				start = i
 			}
 		} else if c == '.' {
-			sentences = append(sentences, w.Extract[start:i+1])
-			start = -1
+			if i < len(w.Extract)-1 && rune(w.Extract[i+1]) == ' ' {
+				sentences = append(sentences, w.Extract[start:i+1])
+				start = -1
+			}
 		}
 		i++
 	}
