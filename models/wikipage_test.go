@@ -42,6 +42,7 @@ var _ = Describe("WikiPage", func() {
 			{FullText: "This sentence has no number.", Positions: []int{}},
 			{FullText: "He was born in 1990.", Positions: []int{15, 18}},
 			{FullText: "Healthy temp is 98.6.", Positions: []int{16, 19}},
+			{FullText: "It is 99.99% effective.", Positions: []int{6, 11}},
 		}
 
 		BeforeEach(func() {
@@ -123,6 +124,22 @@ var _ = Describe("WikiPage", func() {
 			AssertExtractedQuestion(0, 0)
 			AssertExtractedQuestion(1, 2)
 			AssertExtractedQuestion(2, 3)
+		})
+
+		Context(fmt.Sprintf("with extract: %s", ExtractUntil(4)), func() {
+			BeforeEach(func() {
+				wiki.Extract += ExtractUntil(4)
+				questions = wiki.ExtractQuestions()
+			})
+
+			It("should have 4 questions", func() {
+				Expect(questions).To(HaveLen(4))
+			})
+
+			AssertExtractedQuestion(0, 0)
+			AssertExtractedQuestion(1, 2)
+			AssertExtractedQuestion(2, 3)
+			AssertExtractedQuestion(3, 4)
 		})
 	})
 })
