@@ -2,6 +2,7 @@ package models
 
 import (
 	"log"
+	"unicode"
 
 	"github.com/mrap/stringutil"
 	"gopkg.in/pg.v3"
@@ -54,20 +55,23 @@ func (w *WikiPage) ExtractQuestions() []Question {
 
 func (w WikiPage) extractSentences() []string {
 	sentences := make([]string, 0)
+	start := -1
+	rExtract := []rune(w.Extract)
 
-	i, start := 0, -1
-	for _, c := range w.Extract {
+	for i, c := range rExtract {
 		if start == -1 {
-			if c != ' ' {
+			if !unicode.IsSpace(c) {
 				start = i
 			}
 		} else if c == '.' {
-			if i < len(w.Extract)-1 && rune(w.Extract[i+1]) == ' ' {
-				sentences = append(sentences, w.Extract[start:i+1])
-				start = -1
+			if i < len(rExtract)-1 && !unicode.IsSpace(rExtract[i+1]) {
+				continue
+			} else if i < len(rExtract)-2 && !unicode.IsUpper(rExtract[i+2]) {
+				continue
 			}
+			sentences = append(sentences, string([]rune(w.Extract)[start:i+1]))
+			start = -1
 		}
-		i++
 	}
 
 	return sentences
