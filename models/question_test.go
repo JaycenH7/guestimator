@@ -39,4 +39,35 @@ var _ = Describe("Question", func() {
 			Expect(res).To(Equal(&question))
 		})
 	})
+
+	Describe("Parsing a string for a question", func() {
+		var (
+			question *Question
+			str      string
+		)
+
+		JustBeforeEach(func() {
+			question = ParseQuestion(str)
+		})
+
+		Context("with one number", func() {
+			BeforeEach(func() {
+				str = "He is 25."
+			})
+
+			It("should set correct positions", func() {
+				Expect(question.Positions).To(Equal([]int{6, 7}))
+			})
+		})
+
+		Context("with two numbers", func() {
+			BeforeEach(func() {
+				str = "He is 25 not 26."
+			})
+
+			It("should set correct positions", func() {
+				Expect(question.Positions).To(Equal([]int{6, 7, 13, 14}))
+			})
+		})
+	})
 })

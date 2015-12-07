@@ -27,7 +27,9 @@ func GetQuestion(db *pg.DB, id int) (*Question, error) {
 
 func ParseQuestion(s string) *Question {
 	var isDigit bool
+	positions := make([]int, 0)
 	i, start := 0, -1
+
 	for _, c := range s {
 		isDigit = runeIsDigit(c)
 		if start == -1 {
@@ -37,16 +39,21 @@ func ParseQuestion(s string) *Question {
 		} else if !isDigit {
 			// Capture trailing % symbols and decimals too
 			if c != '%' && !(c == '.' && i < len(s)-1 && runeIsDigit(rune(s[i+1]))) {
-				return &Question{
-					FullText:  s,
-					Positions: []int{start, i - 1},
-				}
+				positions = append(positions, start, i-1)
+				start = -1
 			}
 		}
 		i++
 	}
 
-	return nil
+	if len(positions) > 0 {
+		return &Question{
+			FullText:  s,
+			Positions: positions,
+		}
+	} else {
+		return nil
+	}
 }
 
 const (
