@@ -1,10 +1,9 @@
 package models
 
 import (
-	"log"
+	"net/url"
 	"unicode"
 
-	"github.com/mrap/stringutil"
 	"gopkg.in/pg.v3"
 )
 
@@ -19,11 +18,7 @@ type WikiPage struct {
 }
 
 func WikiPageUrl(title string) string {
-	encoded, err := stringutil.UrlEncoded(title)
-	if err != nil {
-		log.Println("Error making wiki page url", err)
-	}
-	return BaseQueryUrl + encoded
+	return BaseQueryUrl + url.QueryEscape(title)
 }
 
 func CreateWikiPage(db *pg.DB, w *WikiPage) error {
