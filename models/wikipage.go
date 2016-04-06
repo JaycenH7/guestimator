@@ -51,20 +51,20 @@ func (w *WikiPage) ExtractQuestions() []Question {
 func (w WikiPage) extractSentences() []string {
 	sentences := make([]string, 0)
 	start := -1
-	rExtract := []rune(w.Extract)
+	len := len(w.Extract)
 
-	for i, c := range rExtract {
+	for i, c := range w.Extract {
 		if start == -1 {
 			if !unicode.IsSpace(c) {
 				start = i
 			}
 		} else if c == '.' {
-			if i < len(rExtract)-1 && !unicode.IsSpace(rExtract[i+1]) {
+			if i+1 < len && !unicode.IsSpace(rune(w.Extract[i+1])) {
 				continue
-			} else if i < len(rExtract)-2 && !unicode.IsUpper(rExtract[i+2]) {
+			} else if i+2 < len && !unicode.IsUpper(rune(w.Extract[i+2])) {
 				continue
 			}
-			sentences = append(sentences, string([]rune(w.Extract)[start:i+1]))
+			sentences = append(sentences, w.Extract[start:i+1])
 			start = -1
 		}
 	}
