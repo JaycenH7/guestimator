@@ -1,7 +1,7 @@
 package db
 
 import (
-	"gopkg.in/pg.v3"
+	"gopkg.in/pg.v4"
 )
 
 const dbname = "guestimator"

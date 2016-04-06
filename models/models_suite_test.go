@@ -5,7 +5,7 @@ import (
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
-	"gopkg.in/pg.v3"
+	"gopkg.in/pg.v4"
 
 	"testing"
 )

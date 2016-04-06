@@ -7,8 +7,8 @@
 	],
 	"Deps": [
 		{
-			"ImportPath": "github.com/golang/glog",
-			"Rev": "23def4e6c14b4da8ac2ed8007337bc5eb5007998"
+			"ImportPath": "github.com/jinzhu/inflection",
+			"Rev": "3272df6c21d04180007eb3349844c89a3856bc25"
 		},
 		{
 			"ImportPath": "github.com/onsi/ginkgo",
@@ -150,19 +150,34 @@
 			"Rev": "db14e161995a5177acef654cb0dd785e8ee8bc22"
 		},
 		{
-			"ImportPath": "gopkg.in/bufio.v1",
-			"Comment": "v1",
-			"Rev": "567b2bfa514e796916c4747494d6ff5132a1dfce"
+			"ImportPath": "gopkg.in/pg.v4",
+			"Comment": "v3.5.6-132-gaa40f0d",
+			"Rev": "aa40f0d4b7781617fcb9237f151c7a1d4e8cc7bd"
 		},
 		{
-			"ImportPath": "gopkg.in/pg.v3",
-			"Comment": "v3.5.6",
-			"Rev": "76e63febeb3f6a6573bd21ca64c4a141c04905b3"
+			"ImportPath": "gopkg.in/pg.v4/internal",
+			"Comment": "v3.5.6-132-gaa40f0d",
+			"Rev": "aa40f0d4b7781617fcb9237f151c7a1d4e8cc7bd"
 		},
 		{
-			"ImportPath": "gopkg.in/pg.v3/pgutil",
-			"Comment": "v3.5.6",
-			"Rev": "76e63febeb3f6a6573bd21ca64c4a141c04905b3"
+			"ImportPath": "gopkg.in/pg.v4/internal/parser",
+			"Comment": "v3.5.6-132-gaa40f0d",
+			"Rev": "aa40f0d4b7781617fcb9237f151c7a1d4e8cc7bd"
+		},
+		{
+			"ImportPath": "gopkg.in/pg.v4/internal/pool",
+			"Comment": "v3.5.6-132-gaa40f0d",
+			"Rev": "aa40f0d4b7781617fcb9237f151c7a1d4e8cc7bd"
+		},
+		{
+			"ImportPath": "gopkg.in/pg.v4/orm",
+			"Comment": "v3.5.6-132-gaa40f0d",
+			"Rev": "aa40f0d4b7781617fcb9237f151c7a1d4e8cc7bd"
+		},
+		{
+			"ImportPath": "gopkg.in/pg.v4/types",
+			"Comment": "v3.5.6-132-gaa40f0d",
+			"Rev": "aa40f0d4b7781617fcb9237f151c7a1d4e8cc7bd"
 		}
 	]
 }

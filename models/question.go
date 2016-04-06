@@ -1,11 +1,11 @@
 package models
 
-import "gopkg.in/pg.v3"
+import "gopkg.in/pg.v4"
 
 type Question struct {
 	Id        int
 	FullText  string
-	Positions []int
+	Positions []int `pg:",array"`
 	PageID    int
 }
 
