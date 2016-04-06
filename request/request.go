@@ -23,7 +23,11 @@ type queryResponse struct {
 }
 
 func GetWikiPage(title string) (*models.WikiPage, error) {
-	res, err := http.Get(models.WikiPageUrl(title))
+	return GetWikiPageByUrl(models.WikiPageUrl(title))
+}
+
+func GetWikiPageByUrl(url string) (*models.WikiPage, error) {
+	res, err := http.Get(url)
 	if err != nil {
 		return nil, err
 	}
