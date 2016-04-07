@@ -70,4 +70,14 @@ var _ = Describe("Question", func() {
 			})
 		})
 	})
+
+	Describe("Pretty format that shows answers as missing", func() {
+		It("should replace the answers with blanks", func() {
+			question := Question{
+				FullText:  "He is 25 not 26.",
+				Positions: []int{6, 7, 13, 14},
+			}
+			Expect(question.SansAnswers()).To(Equal("He is __ not __."))
+		})
+	})
 })

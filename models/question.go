@@ -1,6 +1,7 @@
 package models
 
 import (
+	"bytes"
 	"unicode"
 
 	"gopkg.in/pg.v4"
@@ -11,6 +12,34 @@ type Question struct {
 	FullText  string
 	Positions []int `pg:",array"`
 	PageID    int
+}
+
+func (q Question) String() string {
+	return q.FullText
+}
+
+func (q Question) SansAnswers() string {
+	if len(q.Positions) == 0 {
+		return q.FullText
+	}
+
+	buf := new(bytes.Buffer)
+	posI := 0
+	pos := q.Positions[posI]
+
+	for i, c := range q.FullText {
+		if i == pos {
+			buf.WriteRune('_')
+			posI++
+			if posI < len(q.Positions) {
+				pos = q.Positions[posI]
+			}
+		} else {
+			buf.WriteRune(c)
+		}
+	}
+
+	return buf.String()
 }
 
 func CreateQuestion(db *pg.DB, q *Question) error {
