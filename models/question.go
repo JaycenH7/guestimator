@@ -19,20 +19,24 @@ func (q Question) String() string {
 }
 
 func (q Question) SansAnswers() string {
-	if len(q.Positions) == 0 {
+	if len(q.Positions) < 2 {
 		return q.FullText
 	}
 
 	buf := new(bytes.Buffer)
 	posI := 0
-	pos := q.Positions[posI]
+	startPos := q.Positions[posI]
+	endPos := q.Positions[posI+1]
 
 	for i, c := range q.FullText {
-		if i == pos {
+		if i >= startPos && i <= endPos {
 			buf.WriteRune('_')
-			posI++
-			if posI < len(q.Positions) {
-				pos = q.Positions[posI]
+			if i == endPos {
+				posI += 2
+				if posI < len(q.Positions) {
+					startPos = q.Positions[posI]
+					endPos = q.Positions[posI+1]
+				}
 			}
 		} else {
 			buf.WriteRune(c)
