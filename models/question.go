@@ -23,12 +23,14 @@ func (q Question) SansAnswers() string {
 		return q.FullText
 	}
 
+	i := -1
 	buf := new(bytes.Buffer)
 	posI := 0
 	startPos := q.Positions[posI]
 	endPos := q.Positions[posI+1]
 
-	for i, c := range q.FullText {
+	for _, c := range q.FullText {
+		i++
 		if i >= startPos && i <= endPos {
 			buf.WriteRune('_')
 			if i == endPos {
