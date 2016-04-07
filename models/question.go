@@ -1,6 +1,10 @@
 package models
 
-import "gopkg.in/pg.v4"
+import (
+	"unicode"
+
+	"gopkg.in/pg.v4"
+)
 
 type Question struct {
 	Id        int
@@ -31,14 +35,14 @@ func ParseQuestion(s string) *Question {
 	i, start := 0, -1
 
 	for _, c := range s {
-		isDigit = runeIsDigit(c)
+		isDigit = unicode.IsDigit(c)
 		if start == -1 {
 			if isDigit {
 				start = i
 			}
 		} else if !isDigit {
 			// Capture trailing % symbols and decimals too
-			if c != '%' && !(c == '.' && i < len(s)-1 && runeIsDigit(rune(s[i+1]))) {
+			if c != '%' && !(c == '.' && i < len(s)-1 && unicode.IsDigit(rune(s[i+1]))) {
 				positions = append(positions, start, i-1)
 				start = -1
 			}
@@ -54,30 +58,4 @@ func ParseQuestion(s string) *Question {
 	} else {
 		return nil
 	}
-}
-
-const (
-	digit0 = '0'
-	digit1 = '1'
-	digit2 = '2'
-	digit3 = '3'
-	digit4 = '4'
-	digit5 = '5'
-	digit6 = '6'
-	digit7 = '7'
-	digit8 = '8'
-	digit9 = '9'
-)
-
-func runeIsDigit(r rune) bool {
-	return r == digit0 ||
-		r == digit1 ||
-		r == digit2 ||
-		r == digit3 ||
-		r == digit4 ||
-		r == digit5 ||
-		r == digit6 ||
-		r == digit7 ||
-		r == digit8 ||
-		r == digit9
 }
