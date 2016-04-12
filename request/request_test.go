@@ -9,15 +9,15 @@ import (
 )
 
 var _ = Describe("Requests", func() {
-	Describe("Requesting for a WikiPage", func() {
+	Describe("Requesting for a Wikipage", func() {
 		var (
 			err  error
-			page *models.WikiPage
+			page *models.Wikipage
 		)
 
 		Context("When the wikipage does exist", func() {
 			BeforeEach(func() {
-				page, err = GetWikiPage("Christopher Nolan")
+				page, err = GetWikipage("Christopher Nolan")
 			})
 
 			It("should not have an error", func() {
@@ -29,7 +29,7 @@ var _ = Describe("Requests", func() {
 			})
 
 			It("should have a pageid", func() {
-				Expect(page.PageID).ToNot(BeZero())
+				Expect(page.ID).ToNot(BeZero())
 			})
 
 			It("should have correct extract text", func() {
@@ -39,7 +39,7 @@ var _ = Describe("Requests", func() {
 
 		Context("When the wikipage does not exist", func() {
 			BeforeEach(func() {
-				page, err = GetWikiPage("This does not exist")
+				page, err = GetWikipage("This does not exist")
 			})
 
 			It("should not have an error", func() {

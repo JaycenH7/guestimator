@@ -30,6 +30,6 @@ var _ = BeforeEach(func() {
 	_, err := DB.Exec("DELETE FROM questions;")
 	Expect(err).NotTo(HaveOccurred())
 
-	_, err = DB.Exec("DELETE FROM wiki_pages;")
+	_, err = DB.Exec("DELETE FROM wikipages;")
 	Expect(err).NotTo(HaveOccurred())
 })

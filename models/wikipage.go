@@ -11,44 +11,39 @@ const (
 	BaseQueryUrl = "http://en.wikipedia.org/w/api.php?action=query&prop=extracts&format=json&exintro=&explaintext=&titles="
 )
 
-type WikiPage struct {
-	PageID  int    `json:"pageid"`
-	Title   string `json:"title"`
-	Extract string `json:"extract"`
+type Wikipage struct {
+	ID        int    `json:"pageid"`
+	Title     string `json:"title"`
+	Extract   string `json:"extract" sql:"-"`
+	Questions []Question
 }
 
-func WikiPageUrl(title string) string {
+func WikipageUrl(title string) string {
 	return BaseQueryUrl + url.QueryEscape(title)
 }
 
-func CreateWikiPage(db *pg.DB, w *WikiPage) error {
-	_, err := db.QueryOne(w, `
-		INSERT INTO wiki_pages (page_id, title)
-		VALUES (?page_id, ?title)
-		RETURNING page_id
-	`, w)
-
-	return err
+func CreateWikipage(db *pg.DB, w *Wikipage) error {
+	return db.Create(w)
 }
 
-func GetWikiPage(db *pg.DB, page_id int) (*WikiPage, error) {
-	w := &WikiPage{}
-	_, err := db.QueryOne(w, `SELECT * FROM wiki_pages WHERE page_id = ?`, page_id)
-	return w, err
+func GetWikipage(db *pg.DB, id int) (*Wikipage, error) {
+	w := Wikipage{}
+	err := db.Model(&w).Where("id = ?", id).Select()
+	return &w, err
 }
 
-func (w *WikiPage) ExtractQuestions() []Question {
+func (w *Wikipage) ExtractQuestions() []Question {
 	questions := make([]Question, 0)
 	for _, sentence := range w.extractSentences() {
 		if q := ParseQuestion(sentence); q != nil {
-			q.PageID = w.PageID
+			q.WikipageID = w.ID
 			questions = append(questions, *q)
 		}
 	}
 	return questions
 }
 
-func (w WikiPage) extractSentences() []string {
+func (w Wikipage) extractSentences() []string {
 	sentences := make([]string, 0)
 	start := -1
 	len := len(w.Extract)

@@ -8,10 +8,11 @@ import (
 )
 
 type Question struct {
-	Id        int
-	FullText  string
-	Positions []int `pg:",array"`
-	PageID    int
+	Id         int
+	FullText   string
+	Positions  []int `pg:",array"`
+	WikipageID int
+	Wikipage   *Wikipage
 }
 
 func (q Question) String() string {
@@ -49,19 +50,13 @@ func (q Question) SansAnswers() string {
 }
 
 func CreateQuestion(db *pg.DB, q *Question) error {
-	_, err := db.QueryOne(q, `
-		INSERT INTO questions (page_id, full_text, positions)
-		VALUES (?page_id, ?full_text, ?positions)
-		RETURNING id
-	`, q)
-
-	return err
+	return db.Create(q)
 }
 
 func GetQuestion(db *pg.DB, id int) (*Question, error) {
-	q := &Question{}
-	_, err := db.QueryOne(q, `SELECT * FROM questions WHERE id = ?`, id)
-	return q, err
+	q := Question{}
+	err := db.Model(&q).Where("id = ?", id).Select()
+	return &q, err
 }
 
 func ParseQuestion(s string) *Question {
