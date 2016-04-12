@@ -12,10 +12,10 @@ const (
 )
 
 type Wikipage struct {
-	ID        int    `json:"pageid"`
-	Title     string `json:"title"`
-	Extract   string `json:"extract" sql:"-"`
-	Questions []Question
+	ID        int        `json:"pageid"`
+	Title     string     `json:"title"`
+	Extract   string     `json:"extract,omitempty" sql:"-"`
+	Questions []Question `json:"-"`
 }
 
 func WikipageUrl(title string) string {
