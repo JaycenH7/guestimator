@@ -26,5 +26,5 @@ _testmain.go
 # Keep vendor src local
 vendor/
 
-# Generate ffjson files locally
-*_ffjson.go
+# Generate easyjson files locally
+*_easyjson.go

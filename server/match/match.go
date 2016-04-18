@@ -5,7 +5,6 @@ import (
 	"net/http"
 
 	"github.com/olahol/melody"
-	"github.com/pquerna/ffjson/ffjson"
 )
 
 const MIN_CAPACITY int = 2
@@ -57,14 +56,14 @@ func (m *Match) handlePlayerConnect(s *melody.Session) {
 	playerID := s.Request.URL.Query().Get("player")
 	m.Sessions[playerID] = s
 
-	e := EventPayload{
+	pl := EventPayload{
 		Type: "player_connect",
 		Body: PlayerJoinEvent{
 			PlayerID: playerID,
 		},
 	}
 
-	msg, err := ffjson.Marshal(&e)
+	msg, err := pl.MarshalJSON()
 	if err != nil {
 		log.Println("Error marshaling player_connect message", err)
 	}
