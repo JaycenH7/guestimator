@@ -4,6 +4,7 @@ import (
 	"log"
 	"net/http"
 
+	"github.com/mrap/guestimator/server/match/event"
 	"github.com/olahol/melody"
 )
 
@@ -56,11 +57,9 @@ func (m *Match) handlePlayerConnect(s *melody.Session) {
 	playerID := s.Request.URL.Query().Get("player")
 	m.Sessions[playerID] = s
 
-	pl := EventPayload{
-		Type: "player_connect",
-		Body: PlayerJoinEvent{
-			PlayerID: playerID,
-		},
+	pl := event.Event{
+		Type:     event.TypePlayerJoin,
+		PlayerID: playerID,
 	}
 
 	msg, err := pl.MarshalJSON()
