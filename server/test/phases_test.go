@@ -6,7 +6,6 @@ import (
 	"github.com/mrap/guestimator/client"
 	"github.com/mrap/guestimator/server"
 	"github.com/mrap/guestimator/server/match"
-	"github.com/mrap/guestimator/server/match/event"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
@@ -49,21 +48,38 @@ var _ = Describe("Match Phases", func() {
 			})
 
 			AssertClientsReceivePlayerJoinEvents := func() {
+				Specify("just-connected client should receive MatchState message", func() {
+					newest := connClients[len(connClients)-1]
+					expected := match.Message{
+						Type: match.MatchStateMsgType,
+						MatchState: &match.MatchState{
+							Phase: match.JoinPhaseType,
+						},
+					}
+
+					Eventually(newest.RecvMsg).Should(Receive(Equal(expected)))
+				})
+
 				Specify("just-connected client should not receive PlayerJoin event", func() {
 					newest := connClients[len(connClients)-1]
-					Expect(newest.ReceivedEvents).To(BeEmpty())
+					expected := match.Message{
+						Type:     match.PlayerJoinMsgType,
+						PlayerID: newest.PlayerID,
+					}
+
+					Eventually(newest.RecvMsg).ShouldNot(Receive(Equal(expected)))
 				})
 
 				Specify("previously connected clients should receive PlayerJoin event", func() {
 					newest := connClients[len(connClients)-1]
 
-					expected := event.Event{
-						Type:     event.TypePlayerJoin,
+					expected := match.Message{
+						Type:     match.PlayerJoinMsgType,
 						PlayerID: newest.PlayerID,
 					}
 
 					for _, connC := range connClients[:len(connClients)-1] {
-						Eventually(connC.ReceivedEvents).Should(Receive(Equal(expected)))
+						Eventually(connC.RecvMsg).Should(Receive(Equal(expected)))
 					}
 				})
 			}

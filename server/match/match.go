@@ -4,7 +4,6 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/mrap/guestimator/server/match/event"
 	"github.com/olahol/melody"
 )
 
@@ -63,12 +62,26 @@ func (m *Match) handlePlayerConnect(s *melody.Session) {
 	playerID := s.Request.URL.Query().Get("player")
 	m.Sessions[playerID] = s
 
-	pl := event.Event{
-		Type:     event.TypePlayerJoin,
+	// TODO: cleanup and break out different messages responsiblities to funcs/goroutines
+	state := Message{
+		Type: MatchStateMsgType,
+		MatchState: &MatchState{
+			Phase: m.PhaseType(),
+		},
+	}
+
+	msg, err := state.MarshalJSON()
+	if err != nil {
+		log.Println("Error marshaling match state", err)
+	}
+	s.Write(msg)
+
+	pl := Message{
+		Type:     PlayerJoinMsgType,
 		PlayerID: playerID,
 	}
 
-	msg, err := pl.MarshalJSON()
+	msg, err = pl.MarshalJSON()
 	if err != nil {
 		log.Println("Error marshaling player_connect message", err)
 	}
