@@ -76,7 +76,9 @@ var _ = Describe("Match Phases", func() {
 				It("should be initially in the JoinPhase", func() {
 					cMatch := server.GetMatch(matchID)
 					Expect(cMatch).NotTo(BeNil())
-					Expect(cMatch.CurrentPhase()).To(BeAssignableToTypeOf(match.JoinPhase))
+					Eventually(func() match.PhaseType {
+						return cMatch.PhaseType()
+					}).Should(Equal(match.JoinPhaseType))
 				})
 
 				AssertClientsReceivePlayerJoinEvents()

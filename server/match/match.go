@@ -16,7 +16,7 @@ type Match struct {
 	Hub      *melody.Melody
 	Sessions map[string]*melody.Session
 
-	currentPhase     Phase
+	currentPhaseType PhaseType
 	playerConnect    chan string
 	playerDisconnect chan string
 }
@@ -49,13 +49,12 @@ func NewMatch(id string, capacity int) *Match {
 	return m
 }
 
-func (m Match) CurrentPhase() Phase {
-	return m.currentPhase
+func (m Match) PhaseType() PhaseType {
+	return m.currentPhaseType
 }
 
 func (m *Match) run() {
 	for phase := JoinPhase; phase != nil; {
-		m.currentPhase = phase
 		phase = phase(m)
 	}
 }

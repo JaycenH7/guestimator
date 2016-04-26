@@ -2,18 +2,38 @@ package match
 
 import "log"
 
+type PhaseType int
+
+const (
+	JoinPhaseType PhaseType = iota
+	AnswerPhaseType
+)
+
 type Phase func(*Match) Phase
 
 func JoinPhase(m *Match) Phase {
+	m.currentPhaseType = JoinPhaseType
+
 	for {
 		select {
-		case id := <-m.playerConnect:
-			log.Println("JoinPhase player joined", id)
-			if len(m.Sessions) != m.Capacity {
-				log.Printf("Match #%s still waiting for %d players to connect.", m.ID, m.Capacity-len(m.Sessions))
-			} else {
-				log.Printf("Match #%s capacity reached.", m.ID)
+		case playerID := <-m.playerConnect:
+			log.Println("JoinPhase player joined", playerID)
+			if len(m.Sessions) == m.Capacity {
+				log.Println("JoinPhase capacity reached")
+				return AnswerPhase
 			}
 		}
 	}
+}
+
+func AnswerPhase(m *Match) Phase {
+	m.phaseType = AnswerPhaseType
+
+	for {
+		select {
+		default:
+		}
+	}
+
+	return nil
 }
