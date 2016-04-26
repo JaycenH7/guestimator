@@ -12,7 +12,7 @@ const (
 type Phase func(*Match) Phase
 
 func JoinPhase(m *Match) Phase {
-	m.currentPhaseType = JoinPhaseType
+	m.phaseType = JoinPhaseType
 
 	for {
 		select {
