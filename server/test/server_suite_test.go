@@ -22,21 +22,15 @@ func TestServer(t *testing.T) {
 var matchServer *httptest.Server
 var matchServerHost string
 
-var _ = BeforeSuite(func() {
+var _ = BeforeEach(func() {
 	server.ClearMatches()
 	matchServer = httptest.NewServer(server.NewMatchHandler())
-})
-
-var _ = BeforeEach(func() {
 	matchServerHost = serverHost(*matchServer)
-})
-
-var _ = AfterSuite(func() {
-	matchServer.Close()
 })
 
 var _ = AfterEach(func() {
 	matchServer.CloseClientConnections()
+	matchServer.Close()
 })
 
 func serverHost(s httptest.Server) string {

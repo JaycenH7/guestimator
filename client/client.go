@@ -38,6 +38,8 @@ func (c *Client) Connect(urlStr string) error {
 }
 
 func (c *Client) receiveLoop() {
+	defer close(c.RecvMsg)
+
 	for {
 		var ev match.Message
 		err := websocket.JSON.Receive(c.ws, &ev)
