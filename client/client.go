@@ -28,6 +28,7 @@ func (c *Client) Connect(urlStr string) error {
 	ws, err := websocket.Dial(urlStr, "", "http://localhost/")
 	if err != nil {
 		log.Println("Could not create client connection with url", urlStr, err)
+		return err
 	}
 
 	c.ws = ws

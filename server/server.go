@@ -1,6 +1,8 @@
 package server
 
 import (
+	"net/http"
+
 	"github.com/gin-gonic/gin"
 	"github.com/mrap/guestimator/server/match"
 )
@@ -15,17 +17,25 @@ func NewMatchHandler() *gin.Engine {
 	r.GET("/match/:id/ws", func(c *gin.Context) {
 		id := c.Param("id")
 
-		// get match hub
 		m, ok := matches[id]
 		if !ok {
-			m = match.NewMatch(id, MatchSize)
-			matches[id] = m
+			c.Status(http.StatusNotFound)
+			return
 		}
 
 		// TODO: allow player to connect if authorized
 		m.Hub.HandleRequest(c.Writer, c.Request)
 	})
 	return r
+}
+
+func AddMatch(matchID string) bool {
+	if _, exists := matches[matchID]; exists {
+		return false
+	}
+
+	matches[matchID] = match.NewMatch(matchID, MatchSize)
+	return true
 }
 
 func GetMatch(matchID string) *match.Match {

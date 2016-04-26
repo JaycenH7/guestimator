@@ -19,8 +19,9 @@ var _ = Describe("Match Phases", func() {
 
 	// Each run should have a unique match id
 	BeforeEach(func() {
-		matchID = strconv.Itoa(nextMatchID)
 		nextMatchID++
+		matchID = strconv.Itoa(nextMatchID)
+		server.AddMatch(matchID)
 
 		for i := 0; i < server.MatchSize; i++ {
 			clients[i] = *client.NewClient(strconv.Itoa(i))
@@ -29,7 +30,9 @@ var _ = Describe("Match Phases", func() {
 
 	connect := func(cs ...client.Client) {
 		for _, c := range cs {
-			connectClient(c, matchID, c.PlayerID)
+			if err := connectClient(c, matchID, c.PlayerID); err != nil {
+				Expect(err).ToNot(HaveOccurred())
+			}
 		}
 	}
 
