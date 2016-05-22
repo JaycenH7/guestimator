@@ -43,9 +43,21 @@ func NewMatch(id string, capacity int) *Match {
 		m.playerDisconnect <- playerID
 	})
 
+	go m.offloadEvents()
 	go m.run()
 
 	return m
+}
+
+func (m Match) offloadEvents() {
+	for {
+		select {
+		case playerID := <-m.playerConnect:
+			log.Println("catchAllMessages playerConnect", playerID)
+		case playerID := <-m.playerDisconnect:
+			log.Println("catchAllMessages playerDisconnect", playerID)
+		}
+	}
 }
 
 func (m Match) PhaseType() PhaseType {
