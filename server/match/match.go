@@ -15,7 +15,7 @@ type Match struct {
 	Hub      *melody.Melody
 	Sessions map[string]*melody.Session
 
-	phaseType        PhaseType
+	CurrentPhase     Phase
 	playerConnect    chan string
 	playerDisconnect chan string
 }
@@ -43,30 +43,31 @@ func NewMatch(id string, capacity int) *Match {
 		m.playerDisconnect <- playerID
 	})
 
-	go m.offloadEvents()
 	go m.run()
 
 	return m
 }
 
-func (m Match) offloadEvents() {
-	for {
-		select {
-		case playerID := <-m.playerConnect:
-			log.Println("catchAllMessages playerConnect", playerID)
-		case playerID := <-m.playerDisconnect:
-			log.Println("catchAllMessages playerDisconnect", playerID)
-		}
-	}
-}
-
-func (m Match) PhaseType() PhaseType {
-	return m.phaseType
-}
-
 func (m *Match) run() {
-	for phase := JoinPhase; phase != nil; {
-		phase = phase(m)
+	phases := []Phase{
+		NewJoinPhase(),
+		new(AnswerPhase),
+	}
+
+	for _, m.CurrentPhase = range phases {
+		done := m.CurrentPhase.Run(m)
+
+	PhaseLoop:
+		for {
+			select {
+			case playerID := <-m.playerConnect:
+				m.CurrentPhase.OnPlayerConnect(playerID)
+			case playerID := <-m.playerDisconnect:
+				m.CurrentPhase.OnPlayerDisconnect(playerID)
+			case <-done:
+				break PhaseLoop
+			}
+		}
 	}
 }
 
@@ -78,7 +79,7 @@ func (m *Match) handlePlayerConnect(s *melody.Session) {
 	state := Message{
 		Type: MatchStateMsgType,
 		MatchState: &MatchState{
-			Phase: m.PhaseType(),
+			Phase: m.CurrentPhase.Label(),
 		},
 	}
 

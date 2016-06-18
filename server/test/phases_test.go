@@ -53,7 +53,7 @@ var _ = Describe("Match Phases", func() {
 					expected := match.Message{
 						Type: match.MatchStateMsgType,
 						MatchState: &match.MatchState{
-							Phase: match.JoinPhaseType,
+							Phase: "Join",
 						},
 					}
 
@@ -92,9 +92,9 @@ var _ = Describe("Match Phases", func() {
 				It("should be initially in the JoinPhase", func() {
 					cMatch := server.GetMatch(matchID)
 					Expect(cMatch).NotTo(BeNil())
-					Eventually(func() match.PhaseType {
-						return cMatch.PhaseType()
-					}).Should(Equal(match.JoinPhaseType))
+					Eventually(func() match.Phase {
+						return cMatch.CurrentPhase
+					}).Should(BeAssignableToTypeOf(&match.JoinPhase{}))
 				})
 
 				AssertClientsReceivePlayerJoinEvents()
@@ -109,6 +109,20 @@ var _ = Describe("Match Phases", func() {
 					AssertClientsReceivePlayerJoinEvents()
 				})
 			}
+		})
+	})
+
+	Describe("AnswerPhase", func() {
+		BeforeEach(func() {
+			connect(clients...)
+		})
+
+		It("should change to AnswerPhase", func() {
+			cMatch := server.GetMatch(matchID)
+			Expect(cMatch).NotTo(BeNil())
+			Eventually(func() match.Phase {
+				return cMatch.CurrentPhase
+			}).Should(BeAssignableToTypeOf(&match.AnswerPhase{}))
 		})
 	})
 })

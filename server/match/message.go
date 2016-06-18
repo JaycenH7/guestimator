@@ -17,5 +17,5 @@ type Message struct {
 
 //easyjson:json
 type MatchState struct {
-	Phase PhaseType `json:"phase"`
+	Phase string `json:"phase"`
 }
