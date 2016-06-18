@@ -5,6 +5,7 @@ import (
 	"log"
 	"net/http/httptest"
 	"net/url"
+	"time"
 
 	"github.com/mrap/guestimator/client"
 	"github.com/mrap/guestimator/server"
@@ -21,6 +22,10 @@ func TestServer(t *testing.T) {
 
 var matchServer *httptest.Server
 var matchServerHost string
+
+var _ = BeforeSuite(func() {
+	SetDefaultEventuallyTimeout(2 * time.Second)
+})
 
 var _ = BeforeEach(func() {
 	server.ClearMatches()
