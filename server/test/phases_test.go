@@ -12,7 +12,7 @@ import (
 )
 
 var _ = Describe("Match Phases", func() {
-	var clients [server.MatchSize]client.Client
+	var clients []*client.Client
 	var matchID string
 	var nextMatchID int
 
@@ -22,25 +22,25 @@ var _ = Describe("Match Phases", func() {
 		matchID = strconv.Itoa(nextMatchID)
 		server.AddMatch(matchID)
 
+		clients = make([]*client.Client, server.MatchSize)
 		for i := 0; i < server.MatchSize; i++ {
-			clients[i] = *client.NewClient(strconv.Itoa(i))
+			clients[i] = client.NewClient(strconv.Itoa(i))
 		}
 	})
 
-	connect := func(cs ...client.Client) {
+	connect := func(cs ...*client.Client) {
 		for _, c := range cs {
-			if err := connectClient(c, matchID, c.PlayerID); err != nil {
-				Expect(err).ToNot(HaveOccurred())
-			}
+			err := connectClient(c, matchID, c.PlayerID)
+			Expect(err).ToNot(HaveOccurred())
 		}
 	}
 
 	Describe("JoinPhase", func() {
 		Describe("PlayerJoin events", func() {
-			var connClients []client.Client
+			var connClients []*client.Client
 
 			BeforeEach(func() {
-				connClients = make([]client.Client, 0)
+				connClients = make([]*client.Client, 0)
 			})
 
 			JustBeforeEach(func() {
@@ -86,7 +86,7 @@ var _ = Describe("Match Phases", func() {
 
 			Context("when first player connects", func() {
 				BeforeEach(func() {
-					connClients = []client.Client{clients[0]}
+					connClients = []*client.Client{clients[0]}
 				})
 
 				It("should be initially in the JoinPhase", func() {

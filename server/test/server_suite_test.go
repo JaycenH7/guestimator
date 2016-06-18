@@ -45,6 +45,6 @@ func matchURL(host, matchID, playerID string) string {
 	return fmt.Sprintf("ws://%s/match/%s/ws?player=%s", host, matchID, playerID)
 }
 
-func connectClient(c client.Client, matchID, playerID string) error {
+func connectClient(c *client.Client, matchID, playerID string) error {
 	return c.Connect(matchURL(matchServerHost, matchID, playerID))
 }
