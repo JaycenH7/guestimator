@@ -31,9 +31,7 @@ func (q *PhaseQueue) Next() Phase {
 	}
 
 	p := q.phases[0]
-	if len > 1 {
-		q.phases = q.phases[1:]
-	}
+	q.phases = q.phases[1:]
 
 	return p
 }
