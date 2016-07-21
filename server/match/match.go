@@ -4,16 +4,18 @@ import (
 	"log"
 	"net/http"
 
+	"github.com/mrap/guestimator/models"
 	"github.com/olahol/melody"
 )
 
 const MIN_CAPACITY int = 2
 
 type Match struct {
-	ID       string
-	Capacity int
-	Hub      *melody.Melody
-	Sessions map[string]*melody.Session
+	ID        string
+	Capacity  int
+	Hub       *melody.Melody
+	Questions []models.Question
+	Sessions  map[string]*melody.Session
 
 	CurrentPhase     Phase
 	playerConnect    chan string
@@ -22,7 +24,7 @@ type Match struct {
 	onRoundComplete  chan Round
 }
 
-func NewMatch(id string, capacity int) *Match {
+func NewMatch(id string, capacity int, questions []models.Question) *Match {
 	if capacity < MIN_CAPACITY {
 		capacity = MIN_CAPACITY
 	}
@@ -31,6 +33,7 @@ func NewMatch(id string, capacity int) *Match {
 		ID:               id,
 		Capacity:         capacity,
 		Hub:              melody.New(),
+		Questions:        questions,
 		Sessions:         make(map[string]*melody.Session),
 		playerConnect:    make(chan string),
 		playerGuess:      make(chan PlayerGuess),
@@ -57,7 +60,6 @@ func NewMatch(id string, capacity int) *Match {
 func (m *Match) run() {
 	phases := NewPhaseQueue(
 		NewJoinPhase(),
-		NewGuessPhase(),
 	)
 
 	for phases.Size() > 0 {
@@ -77,6 +79,14 @@ func (m *Match) run() {
 				phases.Prepend(NewGuessResultPhase())
 			case <-done:
 				break PhaseLoop
+			}
+		}
+
+		questionsLeft := len(m.Questions)
+		if questionsLeft > 0 {
+			phases.Append(NewGuessPhase(m.Questions[0]))
+			if questionsLeft > 1 {
+				m.Questions = m.Questions[1:]
 			}
 		}
 	}

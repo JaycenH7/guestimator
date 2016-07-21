@@ -1,14 +1,18 @@
 package match
 
+import "github.com/mrap/guestimator/models"
+
 type GuessPhase struct {
 	onPlayerGuess chan PlayerGuess
 	guesses       Guesses
+	question      models.Question
 }
 
-func NewGuessPhase() *GuessPhase {
+func NewGuessPhase(question models.Question) *GuessPhase {
 	p := &GuessPhase{
 		guesses:       make(Guesses),
 		onPlayerGuess: make(chan PlayerGuess),
+		question:      question,
 	}
 	return p
 }

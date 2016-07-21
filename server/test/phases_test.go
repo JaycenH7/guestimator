@@ -4,6 +4,7 @@ import (
 	"strconv"
 
 	"github.com/mrap/guestimator/client"
+	"github.com/mrap/guestimator/models"
 	"github.com/mrap/guestimator/server"
 	"github.com/mrap/guestimator/server/match"
 
@@ -16,11 +17,15 @@ var _ = Describe("Match Phases", func() {
 	var matchID string
 	var nextMatchID int
 
+	questions := []models.Question{
+		models.Question{},
+	}
+
 	// Each run should have a unique match id
 	BeforeEach(func() {
 		nextMatchID++
 		matchID = strconv.Itoa(nextMatchID)
-		server.AddMatch(matchID)
+		server.AddMatch(matchID, questions)
 
 		clients = make([]*client.Client, server.MatchSize)
 		for i := 0; i < server.MatchSize; i++ {

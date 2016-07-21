@@ -4,6 +4,7 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"github.com/mrap/guestimator/models"
 	"github.com/mrap/guestimator/server/match"
 )
 
@@ -29,12 +30,12 @@ func NewMatchHandler() *gin.Engine {
 	return r
 }
 
-func AddMatch(matchID string) bool {
+func AddMatch(matchID string, questions []models.Question) bool {
 	if _, exists := matches[matchID]; exists {
 		return false
 	}
 
-	matches[matchID] = match.NewMatch(matchID, MatchSize)
+	matches[matchID] = match.NewMatch(matchID, MatchSize, questions)
 	return true
 }
 
