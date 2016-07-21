@@ -18,6 +18,7 @@ type Match struct {
 	Sessions  map[string]*melody.Session
 
 	CurrentPhase     Phase
+	CurrentQuestion  models.Question
 	playerConnect    chan string
 	playerDisconnect chan string
 	playerGuess      chan PlayerGuess
@@ -64,6 +65,7 @@ func (m *Match) run() {
 
 	for phases.Size() > 0 {
 		m.CurrentPhase = phases.Next()
+		m.broadcastMatchState()
 		done := m.CurrentPhase.Run(m)
 
 	PhaseLoop:
@@ -82,12 +84,10 @@ func (m *Match) run() {
 			}
 		}
 
-		questionsLeft := len(m.Questions)
-		if questionsLeft > 0 {
-			phases.Append(NewGuessPhase(m.Questions[0]))
-			if questionsLeft > 1 {
-				m.Questions = m.Questions[1:]
-			}
+		if phases.Size() == 0 && len(m.Questions) > 0 {
+			m.CurrentQuestion = m.Questions[0]
+			phases.Append(NewGuessPhase(m.CurrentQuestion))
+			m.Questions = m.Questions[1:]
 		}
 	}
 }
@@ -141,4 +141,25 @@ func (m *Match) handlePlayerMessage(s *melody.Session, inMsg []byte) {
 		}
 		m.playerGuess <- guess
 	}
+}
+
+func (m *Match) broadcastMatchState() {
+	state := MatchState{
+		Phase: m.CurrentPhase.Label(),
+	}
+	if m.CurrentPhase.Label() == "Guess" {
+		question := m.CurrentQuestion.SansAnswers()
+		state.Question = &question
+	}
+
+	msg := Message{
+		Type:       MatchStateMsgType,
+		MatchState: &state,
+	}
+
+	msgJson, err := msg.MarshalJSON()
+	if err != nil {
+		log.Println("Error marshaling match state", err)
+	}
+	m.Hub.Broadcast(msgJson)
 }

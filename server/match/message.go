@@ -1,6 +1,8 @@
 //go:generate easyjson $GOFILE
 package match
 
+import "github.com/mrap/guestimator/models"
+
 type MsgType int
 
 const (
@@ -20,7 +22,8 @@ type Message struct {
 
 //easyjson:json
 type MatchState struct {
-	Phase string `json:"phase"`
+	Phase    string           `json:"phase"`
+	Question *models.Question `json:"question,omitempty"`
 }
 
 //easyjson:json

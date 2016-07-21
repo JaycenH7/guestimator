@@ -2,6 +2,7 @@ package models_test
 
 import (
 	. "github.com/mrap/guestimator/models"
+	"github.com/mrap/guestimator/models/fixtures"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
@@ -77,7 +78,38 @@ var _ = Describe("Question", func() {
 				FullText:  "He will turn 26 in 2016.",
 				Positions: []int{13, 14, 19, 22},
 			}
-			Expect(question.SansAnswers()).To(Equal("He will turn __ in ____."))
+			Expect(question.FullTextSansAnswers()).To(Equal("He will turn __ in ____."))
+		})
+	})
+
+	Describe("Sans answers", func() {
+		var question Question
+
+		BeforeEach(func() {
+			question = fixtures.Question()
+		})
+
+		Describe("full text sans answers", func() {
+			It("should replace the answers with blanks", func() {
+				Expect(question.FullTextSansAnswers()).To(Equal("He will turn __ in ____."))
+			})
+		})
+
+		Describe("getting a copy rid of any answer-related data", func() {
+			var answerless Question
+
+			BeforeEach(func() {
+				answerless = question.SansAnswers()
+			})
+
+			It("should have full text without the answers", func() {
+				Expect(answerless.FullText).To(Equal(question.FullTextSansAnswers()))
+			})
+
+			It("should have answerless wikipage", func() {
+				Expect(answerless.Wikipage.Extract).To(BeEmpty())
+				Expect(answerless.Wikipage.Questions).To(BeEmpty())
+			})
 		})
 	})
 })

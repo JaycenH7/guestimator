@@ -5,6 +5,7 @@ import (
 
 	"github.com/mrap/guestimator/client"
 	"github.com/mrap/guestimator/models"
+	"github.com/mrap/guestimator/models/fixtures"
 	"github.com/mrap/guestimator/server"
 	"github.com/mrap/guestimator/server/match"
 
@@ -18,7 +19,7 @@ var _ = Describe("Match Phases", func() {
 	var nextMatchID int
 
 	questions := []models.Question{
-		models.Question{},
+		fixtures.Question(),
 	}
 
 	// Each run should have a unique match id
@@ -128,6 +129,21 @@ var _ = Describe("Match Phases", func() {
 			Eventually(func() match.Phase {
 				return cMatch.CurrentPhase
 			}).Should(BeAssignableToTypeOf(&match.GuessPhase{}))
+		})
+
+		It("all players should receive a MatchState message with the question", func() {
+			question := fixtures.Question().SansAnswers()
+			msg := match.Message{
+				Type: match.MatchStateMsgType,
+				MatchState: &match.MatchState{
+					Phase:    "Guess",
+					Question: &question,
+				},
+			}
+
+			for _, c := range clients {
+				Eventually(c.RecvMsg).Should(Receive(Equal(msg)))
+			}
 		})
 
 		Context("when all players have guessed", func() {

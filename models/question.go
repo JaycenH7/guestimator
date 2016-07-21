@@ -1,3 +1,4 @@
+//go:generate easyjson $GOFILE
 package models
 
 import (
@@ -7,19 +8,31 @@ import (
 	"gopkg.in/pg.v4"
 )
 
+//easyjson:json
 type Question struct {
-	Id         int
-	FullText   string
-	Positions  []int `pg:",array"`
+	Id         int    `json:"id"`
+	FullText   string `json:"full_text"`
+	Positions  []int  `json:"pos" pg:",array"`
 	WikipageID int
-	Wikipage   *Wikipage
+	Wikipage   *Wikipage `json:"wikipage,omitempty"`
 }
 
 func (q Question) String() string {
 	return q.FullText
 }
 
-func (q Question) SansAnswers() string {
+func (q Question) SansAnswers() Question {
+	q.FullText = q.FullTextSansAnswers()
+
+	wp := *q.Wikipage
+	wp.Extract = ""
+	wp.Questions = nil
+	q.Wikipage = &wp
+
+	return q
+}
+
+func (q Question) FullTextSansAnswers() string {
 	if len(q.Positions) < 2 {
 		return q.FullText
 	}
