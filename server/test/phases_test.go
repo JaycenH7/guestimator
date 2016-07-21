@@ -112,17 +112,37 @@ var _ = Describe("Match Phases", func() {
 		})
 	})
 
-	Describe("AnswerPhase", func() {
+	Describe("GuessPhase", func() {
 		BeforeEach(func() {
 			connect(clients...)
 		})
 
-		It("should change to AnswerPhase", func() {
+		It("should change to GuessPhase", func() {
 			cMatch := server.GetMatch(matchID)
 			Expect(cMatch).NotTo(BeNil())
 			Eventually(func() match.Phase {
 				return cMatch.CurrentPhase
-			}).Should(BeAssignableToTypeOf(&match.AnswerPhase{}))
+			}).Should(BeAssignableToTypeOf(&match.GuessPhase{}))
+		})
+
+		Context("when all players have guessed", func() {
+			BeforeEach(func() {
+				// All clients send a guess message
+				for _, c := range clients {
+					c.SendMessage(match.Message{
+						Type:  match.GuessMsgType,
+						Guess: &match.Guess{0, 0},
+					})
+				}
+			})
+
+			It("should change to GuessResultPhase phase", func() {
+				cMatch := server.GetMatch(matchID)
+				Expect(cMatch).NotTo(BeNil())
+				Eventually(func() match.Phase {
+					return cMatch.CurrentPhase
+				}).Should(BeAssignableToTypeOf(&match.GuessResultPhase{}))
+			})
 		})
 	})
 })

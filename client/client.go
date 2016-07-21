@@ -51,3 +51,13 @@ func (c *Client) receiveLoop() {
 		c.RecvMsg <- ev
 	}
 }
+
+func (c *Client) SendMessage(msg match.Message) {
+	pl, err := msg.MarshalJSON()
+	if err != nil {
+		log.Fatalln("Could not marshal client JSON", err)
+		return
+	}
+
+	c.ws.Write(pl)
+}

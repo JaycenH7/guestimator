@@ -18,6 +18,8 @@ type Match struct {
 	CurrentPhase     Phase
 	playerConnect    chan string
 	playerDisconnect chan string
+	playerGuess      chan PlayerGuess
+	onRoundComplete  chan Round
 }
 
 func NewMatch(id string, capacity int) *Match {
@@ -31,10 +33,14 @@ func NewMatch(id string, capacity int) *Match {
 		Hub:              melody.New(),
 		Sessions:         make(map[string]*melody.Session),
 		playerConnect:    make(chan string),
+		playerGuess:      make(chan PlayerGuess),
 		playerDisconnect: make(chan string),
+		onRoundComplete:  make(chan Round),
 	}
 
 	m.Hub.Upgrader.CheckOrigin = func(r *http.Request) bool { return true }
+
+	m.Hub.HandleMessage(m.handlePlayerMessage)
 
 	m.Hub.HandleConnect(m.handlePlayerConnect)
 
@@ -49,12 +55,13 @@ func NewMatch(id string, capacity int) *Match {
 }
 
 func (m *Match) run() {
-	phases := []Phase{
+	phases := NewPhaseQueue(
 		NewJoinPhase(),
-		new(AnswerPhase),
-	}
+		NewGuessPhase(),
+	)
 
-	for _, m.CurrentPhase = range phases {
+	for phases.Size() > 0 {
+		m.CurrentPhase = phases.Next()
 		done := m.CurrentPhase.Run(m)
 
 	PhaseLoop:
@@ -64,6 +71,10 @@ func (m *Match) run() {
 				m.CurrentPhase.OnPlayerConnect(playerID)
 			case playerID := <-m.playerDisconnect:
 				m.CurrentPhase.OnPlayerDisconnect(playerID)
+			case guess := <-m.playerGuess:
+				m.CurrentPhase.OnPlayerGuess(guess)
+			case <-m.onRoundComplete:
+				phases.Prepend(NewGuessResultPhase())
 			case <-done:
 				break PhaseLoop
 			}
@@ -102,4 +113,22 @@ func (m *Match) handlePlayerConnect(s *melody.Session) {
 	m.Hub.BroadcastOthers(msg, s)
 
 	m.playerConnect <- playerID
+}
+
+func (m *Match) handlePlayerMessage(s *melody.Session, inMsg []byte) {
+	msg := &Message{}
+
+	err := msg.UnmarshalJSON(inMsg)
+	if err != nil {
+		log.Println("Error unmarshaling player message", err)
+		return
+	}
+
+	if msg.Type == GuessMsgType {
+		guess := PlayerGuess{
+			PlayerID: s.Request.URL.Query().Get("player"),
+			Guess:    *msg.Guess,
+		}
+		m.playerGuess <- guess
+	}
 }

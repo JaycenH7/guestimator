@@ -17,6 +17,9 @@ func (p JoinPhase) Label() string {
 	return "Join"
 }
 
+func (p *JoinPhase) OnPlayerGuess(guess PlayerGuess) {
+}
+
 func (p *JoinPhase) OnPlayerConnect(id string) {
 	log.Println("JoinPhase OnPlayerConnect", id)
 	p.onPlayerConnect <- id
