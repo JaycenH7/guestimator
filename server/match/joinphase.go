@@ -29,13 +29,15 @@ func (p *JoinPhase) Run(m *Match) <-chan struct{} {
 	done := make(chan struct{})
 
 	go func() {
+		defer close(done)
+
 		for {
 			select {
 			case playerID := <-p.onPlayerConnect:
 				log.Println("JoinPhase player joined", playerID)
 				if len(m.Sessions) == m.Capacity {
 					log.Println("JoinPhase capacity reached")
-					close(done)
+					return
 				}
 			}
 		}
