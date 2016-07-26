@@ -102,22 +102,43 @@ var _ = Describe("Question", func() {
 			It("should replace the answers with blanks", func() {
 				Expect(question.FullTextSansAnswers()).To(Equal("He will turn __ in ____."))
 			})
+
+			It("should replace the first answer with blanks", func() {
+				Expect(question.FullTextSansAnswersAt(question.Positions[0])).To(Equal("He will turn __ in 2016."))
+			})
 		})
 
-		Describe("getting a copy rid of any answer-related data", func() {
+		Describe("getting a copy rid of answer-related data", func() {
 			var answerless Question
 
-			BeforeEach(func() {
-				answerless = question.SansAnswers()
+			Context("removing all answers", func() {
+				BeforeEach(func() {
+					answerless = question.SansAnswers()
+				})
+
+				It("should have full text without all answers", func() {
+					Expect(answerless.FullText).To(Equal(question.FullTextSansAnswers()))
+				})
+
+				It("should have answerless wikipage", func() {
+					Expect(answerless.Wikipage.Extract).To(BeEmpty())
+					Expect(answerless.Wikipage.Questions).To(BeEmpty())
+				})
 			})
 
-			It("should have full text without the answers", func() {
-				Expect(answerless.FullText).To(Equal(question.FullTextSansAnswers()))
-			})
+			Context("only removing a single answer", func() {
+				BeforeEach(func() {
+					answerless = question.SansAnswersAt(question.Positions[0])
+				})
 
-			It("should have answerless wikipage", func() {
-				Expect(answerless.Wikipage.Extract).To(BeEmpty())
-				Expect(answerless.Wikipage.Questions).To(BeEmpty())
+				It("should have full text without all answers", func() {
+					Expect(answerless.FullText).To(Equal(question.FullTextSansAnswersAt(question.Positions[0])))
+				})
+
+				It("should have answerless wikipage", func() {
+					Expect(answerless.Wikipage.Extract).To(BeEmpty())
+					Expect(answerless.Wikipage.Questions).To(BeEmpty())
+				})
 			})
 		})
 	})

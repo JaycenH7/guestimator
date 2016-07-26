@@ -132,7 +132,8 @@ var _ = Describe("Match Phases", func() {
 		})
 
 		It("all players should receive a MatchState message with the question", func() {
-			question := fixtures.Question().SansAnswers()
+			q := fixtures.Question()
+			question := q.SansAnswersAt(q.Positions[0])
 			msg := match.Message{
 				Type: match.MatchStateMsgType,
 				MatchState: &match.MatchState{

@@ -184,7 +184,7 @@ func (m *Match) broadcastMatchState(sessions ...*melody.Session) {
 
 	switch m.CurrentPhase.(type) {
 	case *GuessPhase:
-		question := m.CurrentQuestion.SansAnswers()
+		question := m.CurrentQuestion.SansAnswersAt(m.CurrentQuestion.Positions[0])
 		state.Question = &question
 	case *GuessResultPhase:
 		state.Scores = m.Scores

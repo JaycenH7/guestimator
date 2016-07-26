@@ -44,7 +44,11 @@ func (q Question) FirstAnswer() (float64, error) {
 }
 
 func (q Question) SansAnswers() Question {
-	q.FullText = q.FullTextSansAnswers()
+	return q.SansAnswersAt(-1)
+}
+
+func (q Question) SansAnswersAt(answerPos int) Question {
+	q.FullText = q.FullTextSansAnswersAt(answerPos)
 
 	wp := *q.Wikipage
 	wp.Extract = ""
@@ -55,6 +59,10 @@ func (q Question) SansAnswers() Question {
 }
 
 func (q Question) FullTextSansAnswers() string {
+	return q.FullTextSansAnswersAt(-1)
+}
+
+func (q Question) FullTextSansAnswersAt(answerPos int) string {
 	if len(q.Positions) < 2 {
 		return q.FullText
 	}
@@ -67,7 +75,7 @@ func (q Question) FullTextSansAnswers() string {
 
 	for _, c := range q.FullText {
 		i++
-		if i >= startPos && i <= endPos {
+		if i >= startPos && i <= endPos && (answerPos == -1 || startPos == answerPos) {
 			buf.WriteRune('_')
 			if i == endPos {
 				posI += 2
