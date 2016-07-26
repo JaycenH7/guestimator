@@ -90,20 +90,16 @@ func (m *Match) run() {
 			case round := <-m.onRoundComplete:
 				phases.Prepend(NewGuessResultPhase())
 
-				exact, err := m.CurrentQuestion.FirstAnswer()
-				if err != nil {
-					log.Println("Error getting answer from question.", err)
-				}
-
 				distPlayerMap := make(map[float64][]string)
 				dists := make([]float64, 0)
 
+				answer := m.CurrentQuestion.Answer
 				var dist float64
 				for playerID, playerGuess := range round.Guesses {
-					if playerGuess.Guess.Min > exact || playerGuess.Guess.Max < exact {
+					if playerGuess.Guess.Min > answer.Exact || playerGuess.Guess.Max < answer.Exact {
 						dist = math.MaxFloat64
 					} else {
-						dist = math.Abs(exact-playerGuess.Guess.Min) + math.Abs(exact-playerGuess.Guess.Max)
+						dist = math.Abs(answer.Exact-playerGuess.Guess.Min) + math.Abs(answer.Exact-playerGuess.Guess.Max)
 					}
 					distPlayerMap[dist] = append(distPlayerMap[dist], playerID)
 					dists = append(dists, dist)
@@ -131,6 +127,10 @@ func (m *Match) run() {
 				phases.Append(NewMatchResultPhase())
 			} else {
 				m.CurrentQuestion = m.Questions[0]
+				if err := m.CurrentQuestion.PopulateAnswer(); err != nil {
+					// TODO: we probably don't want to use questions unless we have an exact answer
+					log.Println("Error getting answer from question.", err)
+				}
 				phases.Append(NewGuessPhase(m.CurrentQuestion))
 				m.Questions = m.Questions[1:]
 			}
@@ -187,6 +187,7 @@ func (m *Match) broadcastMatchState(sessions ...*melody.Session) {
 		question := m.CurrentQuestion.SansAnswersAt(m.CurrentQuestion.Positions[0])
 		state.Question = &question
 	case *GuessResultPhase:
+		state.Question = &m.CurrentQuestion
 		state.Scores = m.Scores
 	}
 

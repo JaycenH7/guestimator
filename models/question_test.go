@@ -81,13 +81,19 @@ var _ = Describe("Question", func() {
 		It("should be able to return the first answer", func() {
 			answer, err := question.FirstAnswer()
 			Expect(err).ToNot(HaveOccurred())
-			Expect(answer).To(Equal(float64(26)))
+			Expect(answer).To(Equal(Answer{
+				Exact:     float64(26),
+				Formatted: "26",
+			}))
 		})
 
 		It("should be able to return the second answer", func() {
 			answer, err := question.AnswerAt(19)
 			Expect(err).ToNot(HaveOccurred())
-			Expect(answer).To(Equal(float64(2016)))
+			Expect(answer).To(Equal(Answer{
+				Exact:     float64(2016),
+				Formatted: "2016",
+			}))
 		})
 	})
 
@@ -111,6 +117,10 @@ var _ = Describe("Question", func() {
 		Describe("getting a copy rid of answer-related data", func() {
 			var answerless Question
 
+			BeforeEach(func() {
+				question.PopulateAnswer()
+			})
+
 			Context("removing all answers", func() {
 				BeforeEach(func() {
 					answerless = question.SansAnswers()
@@ -123,6 +133,10 @@ var _ = Describe("Question", func() {
 				It("should have answerless wikipage", func() {
 					Expect(answerless.Wikipage.Extract).To(BeEmpty())
 					Expect(answerless.Wikipage.Questions).To(BeEmpty())
+				})
+
+				It("should remove answer", func() {
+					Expect(answerless.Answer).To(BeNil())
 				})
 			})
 
@@ -138,6 +152,10 @@ var _ = Describe("Question", func() {
 				It("should have answerless wikipage", func() {
 					Expect(answerless.Wikipage.Extract).To(BeEmpty())
 					Expect(answerless.Wikipage.Questions).To(BeEmpty())
+				})
+
+				It("should remove answer", func() {
+					Expect(answerless.Answer).To(BeNil())
 				})
 			})
 		})

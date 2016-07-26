@@ -155,15 +155,15 @@ var _ = Describe("Match Phases", func() {
 
 				for i, c := range clients {
 					guess := match.Guess{
-						Min: answer - float64(i),
-						Max: answer + float64(i),
+						Min: answer.Exact - float64(i),
+						Max: answer.Exact + float64(i),
 					}
 
 					// Last client's guess will be out of range
 					if i == len(clients)-1 {
 						guess = match.Guess{
-							Min: answer + float64(i),
-							Max: answer - float64(i),
+							Min: answer.Exact + float64(i),
+							Max: answer.Exact - float64(i),
 						}
 					}
 
@@ -184,10 +184,15 @@ var _ = Describe("Match Phases", func() {
 
 			Context("Scoring", func() {
 				It("should send correct scores", func() {
+					q := questions[0]
+					q.Wikipage.Questions = nil
+					q.PopulateAnswer()
+
 					msg := match.Message{
 						Type: match.MatchStateMsgType,
 						MatchState: &match.MatchState{
-							Phase: "GuessResult",
+							Phase:    "GuessResult",
+							Question: &q,
 							Scores: map[string]int{
 								"0": 3,
 								"1": 2,

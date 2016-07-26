@@ -18,13 +18,29 @@ type Question struct {
 	Positions  []int  `json:"pos" pg:",array"`
 	WikipageID int
 	Wikipage   *Wikipage `json:"wikipage,omitempty"`
+	Answer     *Answer   `json:"answer,omitempty"`
+}
+
+//easyjson:json
+type Answer struct {
+	Exact     float64 `json:"exact"`
+	Formatted string  `json:"formatted"`
 }
 
 func (q Question) String() string {
 	return q.FullText
 }
 
-func (q Question) AnswerAt(pos int) (float64, error) {
+func (q *Question) PopulateAnswer() error {
+	answer, err := q.FirstAnswer()
+	if err != nil {
+		return err
+	}
+	q.Answer = &answer
+	return nil
+}
+
+func (q Question) AnswerAt(pos int) (Answer, error) {
 	endPos := -1
 	for i, p := range q.Positions {
 		if p == pos && i < len(q.Positions)-1 {
@@ -34,7 +50,7 @@ func (q Question) AnswerAt(pos int) (float64, error) {
 	}
 
 	if endPos == -1 {
-		return 0.0, errors.New(fmt.Sprintf("Could not find answer at position: %d", pos))
+		return Answer{}, errors.New(fmt.Sprintf("Could not find answer at position: %d", pos))
 	}
 
 	buf := new(bytes.Buffer)
@@ -49,10 +65,16 @@ func (q Question) AnswerAt(pos int) (float64, error) {
 		}
 	}
 
-	return strconv.ParseFloat(buf.String(), 64)
+	formatted := buf.String()
+	exact, err := strconv.ParseFloat(formatted, 64)
+	answer := Answer{
+		Exact:     exact,
+		Formatted: formatted,
+	}
+	return answer, err
 }
 
-func (q Question) FirstAnswer() (float64, error) {
+func (q Question) FirstAnswer() (Answer, error) {
 	return q.AnswerAt(q.Positions[0])
 }
 
@@ -62,6 +84,7 @@ func (q Question) SansAnswers() Question {
 
 func (q Question) SansAnswersAt(answerPos int) Question {
 	q.FullText = q.FullTextSansAnswersAt(answerPos)
+	q.Answer = nil
 
 	wp := *q.Wikipage
 	wp.Extract = ""
