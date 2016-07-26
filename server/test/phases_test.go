@@ -149,10 +149,26 @@ var _ = Describe("Match Phases", func() {
 		Context("when all players have guessed", func() {
 			BeforeEach(func() {
 				// All clients send a guess message
-				for _, c := range clients {
+				answer, err := questions[0].FirstAnswer()
+				Expect(err).NotTo(HaveOccurred())
+
+				for i, c := range clients {
+					guess := match.Guess{
+						Min: answer - i,
+						Max: answer + i,
+					}
+
+					// Last client's guess will be out of range
+					if i == len(clients)-1 {
+						guess = match.Guess{
+							Min: answer + i,
+							Max: answer - i,
+						}
+					}
+
 					c.SendMessage(match.Message{
 						Type:  match.GuessMsgType,
-						Guess: &match.Guess{0, 0},
+						Guess: &guess,
 					})
 				}
 			})
@@ -163,6 +179,26 @@ var _ = Describe("Match Phases", func() {
 				Eventually(func() match.Phase {
 					return cMatch.CurrentPhase
 				}).Should(BeAssignableToTypeOf(&match.GuessResultPhase{}))
+			})
+
+			Context("Scoring", func() {
+				It("should send correct scores", func() {
+					msg := match.Message{
+						Type: match.MatchStateMsgType,
+						MatchState: &match.MatchState{
+							Phase: "GuessResult",
+							Scores: map[string]int{
+								"0": 3,
+								"1": 2,
+								"2": 0,
+							},
+						},
+					}
+
+					for _, c := range clients {
+						Eventually(c.RecvMsg).Should(Receive(Equal(msg)))
+					}
+				})
 			})
 
 			Context("when no questions remain", func() {

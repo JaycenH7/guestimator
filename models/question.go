@@ -3,6 +3,9 @@ package models
 
 import (
 	"bytes"
+	"errors"
+	"fmt"
+	"strconv"
 	"unicode"
 
 	"gopkg.in/pg.v4"
@@ -19,6 +22,26 @@ type Question struct {
 
 func (q Question) String() string {
 	return q.FullText
+}
+
+func (q Question) AnswerAt(pos int) (int, error) {
+	endPos := -1
+	for i, p := range q.Positions {
+		if p == pos && i < len(q.Positions)-1 {
+			endPos = q.Positions[i+1]
+			break
+		}
+	}
+
+	if endPos == -1 {
+		return -1, errors.New(fmt.Sprintf("Could not find answer at position: %d", pos))
+	}
+
+	return strconv.Atoi(q.FullText[pos : endPos+1])
+}
+
+func (q Question) FirstAnswer() (int, error) {
+	return q.AnswerAt(q.Positions[0])
 }
 
 func (q Question) SansAnswers() Question {

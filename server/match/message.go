@@ -24,6 +24,7 @@ type Message struct {
 type MatchState struct {
 	Phase    string           `json:"phase"`
 	Question *models.Question `json:"question,omitempty"`
+	Scores   Scores           `json:"scores,omitempty"`
 }
 
 //easyjson:json
@@ -36,3 +37,5 @@ type PlayerGuess struct {
 	PlayerID string
 	Guess    Guess
 }
+
+type Scores map[string]int

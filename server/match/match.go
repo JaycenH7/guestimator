@@ -2,7 +2,9 @@ package match
 
 import (
 	"log"
+	"math"
 	"net/http"
+	"sort"
 
 	"github.com/mrap/guestimator/models"
 	"github.com/olahol/melody"
@@ -18,6 +20,7 @@ type Match struct {
 	Sessions  map[string]*melody.Session
 
 	CurrentPhase     Phase
+	Scores           Scores
 	CurrentQuestion  models.Question
 	playerConnect    chan string
 	playerDisconnect chan string
@@ -36,6 +39,7 @@ func NewMatch(id string, capacity int, questions []models.Question) *Match {
 		Hub:              melody.New(),
 		Questions:        questions,
 		Sessions:         make(map[string]*melody.Session),
+		Scores:           make(Scores),
 		playerConnect:    make(chan string),
 		playerGuess:      make(chan PlayerGuess),
 		playerDisconnect: make(chan string),
@@ -77,8 +81,40 @@ func (m *Match) run() {
 				m.CurrentPhase.OnPlayerDisconnect(playerID)
 			case guess := <-m.playerGuess:
 				m.CurrentPhase.OnPlayerGuess(guess)
-			case <-m.onRoundComplete:
+			case round := <-m.onRoundComplete:
 				phases.Prepend(NewGuessResultPhase())
+
+				exact, err := m.CurrentQuestion.FirstAnswer()
+				if err != nil {
+					log.Println("Error getting answer from question.", err)
+				}
+
+				distPlayerMap := make(map[float64][]string)
+				dists := make([]float64, 0)
+
+				var dist float64
+				for playerID, playerGuess := range round.Guesses {
+					if playerGuess.Guess.Min > exact || playerGuess.Guess.Max < exact {
+						dist = math.MaxFloat64
+					} else {
+						dist = math.Abs(float64(exact-playerGuess.Guess.Min)) + math.Abs(float64(exact-playerGuess.Guess.Max))
+					}
+					distPlayerMap[dist] = append(distPlayerMap[dist], playerID)
+					dists = append(dists, dist)
+				}
+
+				sort.Float64s(dists)
+
+				for i, score := range dists {
+					for _, playerID := range distPlayerMap[score] {
+						if score < math.MaxFloat64 {
+							m.Scores[playerID] += m.Capacity - i
+						} else {
+							m.Scores[playerID] += 0
+						}
+					}
+				}
+
 			case <-done:
 				break PhaseLoop
 			}
@@ -151,9 +187,13 @@ func (m *Match) broadcastMatchState() {
 	state := MatchState{
 		Phase: m.CurrentPhase.Label(),
 	}
-	if m.CurrentPhase.Label() == "Guess" {
+
+	switch m.CurrentPhase.(type) {
+	case *GuessPhase:
 		question := m.CurrentQuestion.SansAnswers()
 		state.Question = &question
+	case *GuessResultPhase:
+		state.Scores = m.Scores
 	}
 
 	msg := Message{

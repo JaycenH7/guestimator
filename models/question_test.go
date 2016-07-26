@@ -72,6 +72,25 @@ var _ = Describe("Question", func() {
 		})
 	})
 
+	Describe("Accessing answers", func() {
+		var question Question
+		BeforeEach(func() {
+			question = fixtures.Question()
+		})
+
+		It("should be able to return the first answer", func() {
+			answer, err := question.FirstAnswer()
+			Expect(err).ToNot(HaveOccurred())
+			Expect(answer).To(Equal(26))
+		})
+
+		It("should be able to return the second answer", func() {
+			answer, err := question.AnswerAt(19)
+			Expect(err).ToNot(HaveOccurred())
+			Expect(answer).To(Equal(2016))
+		})
+	})
+
 	Describe("Pretty format that shows answers as missing", func() {
 		It("should replace the answers with blanks", func() {
 			question := Question{
