@@ -2,6 +2,7 @@ package models_test
 
 import (
 	. "github.com/mrap/guestimator/models"
+	"github.com/mrap/guestimator/models/fixtures"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
@@ -11,22 +12,22 @@ var _ = Describe("Question", func() {
 
 	Describe("Creating a question", func() {
 		var (
-			wiki     WikiPage
+			wiki     Wikipage
 			question Question
 		)
 
 		BeforeEach(func() {
-			wiki = WikiPage{
-				PageID: 1,
-				Title:  "My WikiPage",
+			wiki = Wikipage{
+				ID:    1,
+				Title: "My Wikipage",
 			}
-			err := CreateWikiPage(DB, &wiki)
+			err := CreateWikipage(DB, &wiki)
 			Expect(err).NotTo(HaveOccurred())
 
 			question = Question{
-				FullText:  "42 has 2 digits",
-				Positions: []int{0, 7},
-				PageID:    wiki.PageID,
+				FullText:   "42 has 2 digits",
+				Positions:  []int{0, 7},
+				WikipageID: wiki.ID,
 			}
 			err = CreateQuestion(DB, &question)
 			Expect(err).NotTo(HaveOccurred())
@@ -71,13 +72,63 @@ var _ = Describe("Question", func() {
 		})
 	})
 
+	Describe("Accessing answers", func() {
+		var question Question
+		BeforeEach(func() {
+			question = fixtures.Question()
+		})
+
+		It("should be able to return the first answer", func() {
+			answer, err := question.FirstAnswer()
+			Expect(err).ToNot(HaveOccurred())
+			Expect(answer).To(Equal(float64(26)))
+		})
+
+		It("should be able to return the second answer", func() {
+			answer, err := question.AnswerAt(19)
+			Expect(err).ToNot(HaveOccurred())
+			Expect(answer).To(Equal(float64(2016)))
+		})
+	})
+
 	Describe("Pretty format that shows answers as missing", func() {
 		It("should replace the answers with blanks", func() {
 			question := Question{
 				FullText:  "He will turn 26 in 2016.",
 				Positions: []int{13, 14, 19, 22},
 			}
-			Expect(question.SansAnswers()).To(Equal("He will turn __ in ____."))
+			Expect(question.FullTextSansAnswers()).To(Equal("He will turn __ in ____."))
+		})
+	})
+
+	Describe("Sans answers", func() {
+		var question Question
+
+		BeforeEach(func() {
+			question = fixtures.Question()
+		})
+
+		Describe("full text sans answers", func() {
+			It("should replace the answers with blanks", func() {
+				Expect(question.FullTextSansAnswers()).To(Equal("He will turn __ in ____."))
+			})
+		})
+
+		Describe("getting a copy rid of any answer-related data", func() {
+			var answerless Question
+
+			BeforeEach(func() {
+				answerless = question.SansAnswers()
+			})
+
+			It("should have full text without the answers", func() {
+				Expect(answerless.FullText).To(Equal(question.FullTextSansAnswers()))
+			})
+
+			It("should have answerless wikipage", func() {
+				Expect(answerless.Wikipage.Extract).To(BeEmpty())
+				Expect(answerless.Wikipage.Questions).To(BeEmpty())
+			})
 		})
 	})
 })

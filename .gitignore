@@ -25,3 +25,6 @@ _testmain.go
 
 # Keep vendor src local
 vendor/
+
+# Generate easyjson files locally
+*_easyjson.go

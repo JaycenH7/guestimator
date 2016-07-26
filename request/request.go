@@ -7,7 +7,7 @@ import (
 	"github.com/mrap/guestimator/models"
 )
 
-type pagesMap map[string]models.WikiPage
+type pagesMap map[string]models.Wikipage
 
 func (m pagesMap) isEmpty() bool {
 	_, hasKey := m["-1"]
@@ -22,11 +22,11 @@ type queryResponse struct {
 	Query wikiQuery `json:"query"`
 }
 
-func GetWikiPage(title string) (*models.WikiPage, error) {
-	return GetWikiPageByUrl(models.WikiPageUrl(title))
+func GetWikipage(title string) (*models.Wikipage, error) {
+	return GetWikipageByUrl(models.WikipageUrl(title))
 }
 
-func GetWikiPageByUrl(url string) (*models.WikiPage, error) {
+func GetWikipageByUrl(url string) (*models.Wikipage, error) {
 	res, err := http.Get(url)
 	if err != nil {
 		return nil, err
@@ -43,7 +43,7 @@ func GetWikiPageByUrl(url string) (*models.WikiPage, error) {
 		return nil, nil
 	}
 
-	var page models.WikiPage
+	var page models.Wikipage
 	for _, v := range queryRes.Query.Pages {
 		page = v
 		break

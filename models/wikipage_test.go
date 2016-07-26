@@ -9,23 +9,23 @@ import (
 	. "github.com/onsi/gomega"
 )
 
-var _ = Describe("WikiPage", func() {
+var _ = Describe("Wikipage", func() {
 
 	Describe("Creating a wiki page", func() {
-		var wiki WikiPage
+		var wiki Wikipage
 
 		BeforeEach(func() {
-			wiki = WikiPage{
-				PageID: 1,
-				Title:  "My WikiPage",
+			wiki = Wikipage{
+				ID:    1,
+				Title: "My Wikipage",
 			}
-			err := CreateWikiPage(DB, &wiki)
+			err := CreateWikipage(DB, &wiki)
 			Expect(err).NotTo(HaveOccurred())
-			Expect(wiki.PageID).NotTo(BeZero())
+			Expect(wiki.ID).NotTo(BeZero())
 		})
 
 		It("should be saved in db", func() {
-			res, err := GetWikiPage(DB, wiki.PageID)
+			res, err := GetWikipage(DB, wiki.ID)
 			Expect(err).NotTo(HaveOccurred())
 			Expect(res).To(Equal(&wiki))
 		})
@@ -33,7 +33,7 @@ var _ = Describe("WikiPage", func() {
 
 	Describe("Extracting questions out of a wiki page", func() {
 		var (
-			wiki      WikiPage
+			wiki      Wikipage
 			questions []Question
 		)
 
@@ -46,9 +46,9 @@ var _ = Describe("WikiPage", func() {
 		}
 
 		BeforeEach(func() {
-			wiki = WikiPage{
-				PageID:  1,
-				Title:   "My WikiPage",
+			wiki = Wikipage{
+				ID:      1,
+				Title:   "My Wikipage",
 				Extract: "",
 			}
 		})
@@ -59,7 +59,7 @@ var _ = Describe("WikiPage", func() {
 				s := sentences[sPos]
 				Expect(q.FullText).To(Equal(s.FullText))
 				Expect(q.Positions).To(Equal(s.Positions))
-				Expect(q.PageID).To(Equal(wiki.PageID))
+				Expect(q.WikipageID).To(Equal(wiki.ID))
 			})
 		}
 

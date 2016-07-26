@@ -10,7 +10,7 @@ import (
 
 var _ = Describe("Parser", func() {
 	Describe("Fetching top wikipages", func() {
-		var wikis []models.WikiPage
+		var wikis []models.Wikipage
 
 		BeforeEach(func() {
 			wikis = FetchTopWikis()

@@ -1,24 +1,60 @@
+//go:generate easyjson $GOFILE
 package models
 
 import (
 	"bytes"
+	"errors"
+	"fmt"
+	"strconv"
 	"unicode"
 
 	"gopkg.in/pg.v4"
 )
 
+//easyjson:json
 type Question struct {
-	Id        int
-	FullText  string
-	Positions []int `pg:",array"`
-	PageID    int
+	Id         int    `json:"id"`
+	FullText   string `json:"full_text"`
+	Positions  []int  `json:"pos" pg:",array"`
+	WikipageID int
+	Wikipage   *Wikipage `json:"wikipage,omitempty"`
 }
 
 func (q Question) String() string {
 	return q.FullText
 }
 
-func (q Question) SansAnswers() string {
+func (q Question) AnswerAt(pos int) (float64, error) {
+	endPos := -1
+	for i, p := range q.Positions {
+		if p == pos && i < len(q.Positions)-1 {
+			endPos = q.Positions[i+1]
+			break
+		}
+	}
+
+	if endPos == -1 {
+		return 0.0, errors.New(fmt.Sprintf("Could not find answer at position: %d", pos))
+	}
+	return strconv.ParseFloat(q.FullText[pos:endPos+1], 64)
+}
+
+func (q Question) FirstAnswer() (float64, error) {
+	return q.AnswerAt(q.Positions[0])
+}
+
+func (q Question) SansAnswers() Question {
+	q.FullText = q.FullTextSansAnswers()
+
+	wp := *q.Wikipage
+	wp.Extract = ""
+	wp.Questions = nil
+	q.Wikipage = &wp
+
+	return q
+}
+
+func (q Question) FullTextSansAnswers() string {
 	if len(q.Positions) < 2 {
 		return q.FullText
 	}
@@ -49,19 +85,13 @@ func (q Question) SansAnswers() string {
 }
 
 func CreateQuestion(db *pg.DB, q *Question) error {
-	_, err := db.QueryOne(q, `
-		INSERT INTO questions (page_id, full_text, positions)
-		VALUES (?page_id, ?full_text, ?positions)
-		RETURNING id
-	`, q)
-
-	return err
+	return db.Create(q)
 }
 
 func GetQuestion(db *pg.DB, id int) (*Question, error) {
-	q := &Question{}
-	_, err := db.QueryOne(q, `SELECT * FROM questions WHERE id = ?`, id)
-	return q, err
+	q := Question{}
+	err := db.Model(&q).Where("id = ?", id).Select()
+	return &q, err
 }
 
 func ParseQuestion(s string) *Question {

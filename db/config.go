@@ -1,14 +1,14 @@
 package db
 
-import (
-	"gopkg.in/pg.v4"
-)
+import "gopkg.in/pg.v4"
 
 const dbname = "guestimator"
 
+var DevDB = pg.Connect(Options("dev"))
+
 func Options(env string) *pg.Options {
 	if env == "" {
-		env = "development"
+		env = "dev"
 	}
 
 	var opts pg.Options

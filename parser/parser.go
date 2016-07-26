@@ -12,13 +12,13 @@ import (
 
 const topWikisURL = "https://en.wikipedia.org/wiki/Wikipedia:Top_25_Report"
 
-func FetchTopWikis() []models.WikiPage {
+func FetchTopWikis() []models.Wikipage {
 	urls := fetchTopWikiURLs()
-	wikis := make([]models.WikiPage, len(urls))
+	wikis := make([]models.Wikipage, len(urls))
 
 	for i, u := range urls {
 		if title, err := url.QueryUnescape(path.Base(u)); err == nil {
-			if wp, _ := request.GetWikiPage(title); wp != nil {
+			if wp, _ := request.GetWikipage(title); wp != nil {
 				wikis[i] = *wp
 			}
 		}
