@@ -36,7 +36,20 @@ func (q Question) AnswerAt(pos int) (float64, error) {
 	if endPos == -1 {
 		return 0.0, errors.New(fmt.Sprintf("Could not find answer at position: %d", pos))
 	}
-	return strconv.ParseFloat(q.FullText[pos:endPos+1], 64)
+
+	buf := new(bytes.Buffer)
+	i := -1
+	for _, c := range q.FullText {
+		i++
+		if i >= pos && i <= endPos {
+			buf.WriteRune(c)
+		}
+		if i == endPos {
+			break
+		}
+	}
+
+	return strconv.ParseFloat(buf.String(), 64)
 }
 
 func (q Question) FirstAnswer() (float64, error) {
