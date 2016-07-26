@@ -26,7 +26,7 @@ var _ = Describe("Match Phases", func() {
 	BeforeEach(func() {
 		nextMatchID++
 		matchID = strconv.Itoa(nextMatchID)
-		server.AddMatch(matchID, questions)
+		server.AddMatch(matchID, server.MatchSize, questions)
 
 		clients = make([]*client.Client, server.MatchSize)
 		for i := 0; i < server.MatchSize; i++ {

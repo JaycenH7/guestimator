@@ -12,6 +12,11 @@ import (
 
 const MIN_CAPACITY int = 2
 
+type playerSession struct {
+	playerID string
+	session  *melody.Session
+}
+
 type Match struct {
 	ID        string
 	Capacity  int
@@ -22,7 +27,7 @@ type Match struct {
 	CurrentPhase     Phase
 	Scores           Scores
 	CurrentQuestion  models.Question
-	playerConnect    chan string
+	playerConnect    chan playerSession
 	playerDisconnect chan string
 	playerGuess      chan PlayerGuess
 	onRoundComplete  chan Round
@@ -40,7 +45,7 @@ func NewMatch(id string, capacity int, questions []models.Question) *Match {
 		Questions:        questions,
 		Sessions:         make(map[string]*melody.Session),
 		Scores:           make(Scores),
-		playerConnect:    make(chan string),
+		playerConnect:    make(chan playerSession),
 		playerGuess:      make(chan PlayerGuess),
 		playerDisconnect: make(chan string),
 		onRoundComplete:  make(chan Round),
@@ -75,8 +80,9 @@ func (m *Match) run() {
 	PhaseLoop:
 		for {
 			select {
-			case playerID := <-m.playerConnect:
-				m.CurrentPhase.OnPlayerConnect(playerID)
+			case ps := <-m.playerConnect:
+				m.Sessions[ps.playerID] = ps.session
+				m.CurrentPhase.OnPlayerConnect(ps.playerID)
 			case playerID := <-m.playerDisconnect:
 				m.CurrentPhase.OnPlayerDisconnect(playerID)
 			case guess := <-m.playerGuess:
@@ -134,35 +140,23 @@ func (m *Match) run() {
 
 func (m *Match) handlePlayerConnect(s *melody.Session) {
 	playerID := s.Request.URL.Query().Get("player")
-	m.Sessions[playerID] = s
-
-	// TODO: cleanup and break out different messages responsiblities to funcs/goroutines
-	state := Message{
-		Type: MatchStateMsgType,
-		MatchState: &MatchState{
-			Phase: m.CurrentPhase.Label(),
-		},
-	}
-
-	msg, err := state.MarshalJSON()
-	if err != nil {
-		log.Println("Error marshaling match state", err)
-	}
-	s.Write(msg)
 
 	pl := Message{
 		Type:     PlayerJoinMsgType,
 		PlayerID: playerID,
 	}
-
-	msg, err = pl.MarshalJSON()
+	msg, err := pl.MarshalJSON()
 	if err != nil {
 		log.Println("Error marshaling player_connect message", err)
 	}
-
 	m.Hub.BroadcastOthers(msg, s)
 
-	m.playerConnect <- playerID
+	m.broadcastMatchState(s)
+
+	m.playerConnect <- playerSession{
+		playerID: playerID,
+		session:  s,
+	}
 }
 
 func (m *Match) handlePlayerMessage(s *melody.Session, inMsg []byte) {
@@ -183,7 +177,7 @@ func (m *Match) handlePlayerMessage(s *melody.Session, inMsg []byte) {
 	}
 }
 
-func (m *Match) broadcastMatchState() {
+func (m *Match) broadcastMatchState(sessions ...*melody.Session) {
 	state := MatchState{
 		Phase: m.CurrentPhase.Label(),
 	}
@@ -205,5 +199,12 @@ func (m *Match) broadcastMatchState() {
 	if err != nil {
 		log.Println("Error marshaling match state", err)
 	}
-	m.Hub.Broadcast(msgJson)
+
+	if len(sessions) == 0 {
+		m.Hub.Broadcast(msgJson)
+	} else {
+		for _, s := range sessions {
+			s.Write(msgJson)
+		}
+	}
 }

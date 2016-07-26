@@ -30,12 +30,12 @@ func NewMatchHandler() *gin.Engine {
 	return r
 }
 
-func AddMatch(matchID string, questions []models.Question) bool {
+func AddMatch(matchID string, matchSize int, questions []models.Question) bool {
 	if _, exists := matches[matchID]; exists {
 		return false
 	}
 
-	matches[matchID] = match.NewMatch(matchID, MatchSize, questions)
+	matches[matchID] = match.NewMatch(matchID, matchSize, questions)
 	return true
 }
 
