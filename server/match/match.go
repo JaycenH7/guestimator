@@ -84,10 +84,14 @@ func (m *Match) run() {
 			}
 		}
 
-		if phases.Size() == 0 && len(m.Questions) > 0 {
-			m.CurrentQuestion = m.Questions[0]
-			phases.Append(NewGuessPhase(m.CurrentQuestion))
-			m.Questions = m.Questions[1:]
+		if phases.Size() == 0 {
+			if len(m.Questions) == 0 {
+				phases.Append(NewMatchResultPhase())
+			} else {
+				m.CurrentQuestion = m.Questions[0]
+				phases.Append(NewGuessPhase(m.CurrentQuestion))
+				m.Questions = m.Questions[1:]
+			}
 		}
 	}
 }

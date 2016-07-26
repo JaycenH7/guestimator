@@ -164,6 +164,22 @@ var _ = Describe("Match Phases", func() {
 					return cMatch.CurrentPhase
 				}).Should(BeAssignableToTypeOf(&match.GuessResultPhase{}))
 			})
+
+			Context("when no questions remain", func() {
+				It("should change to MatchResultPhase phase", func() {
+					cMatch := server.GetMatch(matchID)
+					Expect(cMatch).NotTo(BeNil())
+					Eventually(func() match.Phase {
+						return cMatch.CurrentPhase
+					}).Should(BeAssignableToTypeOf(&match.MatchResultPhase{}))
+				})
+
+				It("should disconnect all clients", func() {
+					for _, c := range clients {
+						Eventually(c.RecvMsg).Should(BeClosed())
+					}
+				})
+			})
 		})
 	})
 })
