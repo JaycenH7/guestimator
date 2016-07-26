@@ -108,7 +108,7 @@ func (m *Match) run() {
 				for i, score := range dists {
 					for _, playerID := range distPlayerMap[score] {
 						if score < math.MaxFloat64 {
-							m.Scores[playerID] += m.Capacity - i
+							m.Scores[playerID] += len(round.Guesses) - i
 						} else {
 							m.Scores[playerID] += 0
 						}
