@@ -11,7 +11,17 @@ import (
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
+	"github.com/onsi/gomega/types"
 )
+
+func EqualMessage(cmp match.Message) types.GomegaMatcher {
+	return WithTransform(func(m match.Message) match.Message {
+		if m.MatchState != nil {
+			m.MatchState.PhaseMsLeft = 0
+		}
+		return m
+	}, Equal(cmp))
+}
 
 var _ = Describe("Match Phases", func() {
 	var clients []*client.Client
@@ -63,7 +73,7 @@ var _ = Describe("Match Phases", func() {
 						},
 					}
 
-					Eventually(newest.RecvMsg).Should(Receive(Equal(expected)))
+					Eventually(newest.RecvMsg).Should(Receive(EqualMessage(expected)))
 				})
 
 				Specify("just-connected client should not receive PlayerJoin event", func() {
@@ -73,7 +83,7 @@ var _ = Describe("Match Phases", func() {
 						PlayerID: newest.PlayerID,
 					}
 
-					Eventually(newest.RecvMsg).ShouldNot(Receive(Equal(expected)))
+					Eventually(newest.RecvMsg).ShouldNot(Receive(EqualMessage(expected)))
 				})
 
 				Specify("previously connected clients should receive PlayerJoin event", func() {
@@ -85,7 +95,7 @@ var _ = Describe("Match Phases", func() {
 					}
 
 					for _, connC := range connClients[:len(connClients)-1] {
-						Eventually(connC.RecvMsg).Should(Receive(Equal(expected)))
+						Eventually(connC.RecvMsg).Should(Receive(EqualMessage(expected)))
 					}
 				})
 			}
@@ -143,7 +153,7 @@ var _ = Describe("Match Phases", func() {
 			}
 
 			for _, c := range clients {
-				Eventually(c.RecvMsg).Should(Receive(Equal(msg)))
+				Eventually(c.RecvMsg).Should(Receive(EqualMessage(msg)))
 			}
 		})
 
@@ -202,7 +212,7 @@ var _ = Describe("Match Phases", func() {
 					}
 
 					for _, c := range clients {
-						Eventually(c.RecvMsg).Should(Receive(Equal(msg)))
+						Eventually(c.RecvMsg).Should(Receive(EqualMessage(msg)))
 					}
 				})
 			})

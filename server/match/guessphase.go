@@ -1,11 +1,16 @@
 package match
 
-import "github.com/mrap/guestimator/models"
+import (
+	"time"
+
+	"github.com/mrap/guestimator/models"
+)
 
 type GuessPhase struct {
 	onPlayerGuess chan PlayerGuess
 	guesses       Guesses
 	question      models.Question
+	endTime       time.Time
 }
 
 func NewGuessPhase(question models.Question) *GuessPhase {
@@ -31,22 +36,31 @@ func (p *GuessPhase) OnPlayerConnect(id string) {
 func (p *GuessPhase) OnPlayerDisconnect(id string) {
 }
 
+func (p GuessPhase) TimeRemaining() time.Duration {
+	return p.endTime.Sub(time.Now())
+}
+
 func (p *GuessPhase) Run(m *Match) <-chan struct{} {
 	done := make(chan struct{})
+	p.endTime = time.Now().Add(PhaseDuration)
 
 	go func() {
-		defer close(done)
+		defer func() {
+			m.onRoundComplete <- Round{
+				Guesses: p.guesses,
+			}
+			close(done)
+		}()
 
 		for {
 			select {
 			case guess := <-p.onPlayerGuess:
 				p.guesses[guess.PlayerID] = guess
 				if len(p.guesses) == len(m.Sessions) {
-					m.onRoundComplete <- Round{
-						Guesses: p.guesses,
-					}
 					return
 				}
+			case <-time.After(PhaseDuration):
+				return
 			}
 		}
 	}()

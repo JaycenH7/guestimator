@@ -1,9 +1,13 @@
 package match
 
-import "log"
+import (
+	"log"
+	"time"
+)
 
 type JoinPhase struct {
 	onPlayerConnect chan string
+	endTime         time.Time
 }
 
 func NewJoinPhase() *JoinPhase {
@@ -28,11 +32,18 @@ func (p *JoinPhase) OnPlayerConnect(id string) {
 func (p *JoinPhase) OnPlayerDisconnect(id string) {
 }
 
+func (p JoinPhase) TimeRemaining() time.Duration {
+	return p.endTime.Sub(time.Now())
+}
+
 func (p *JoinPhase) Run(m *Match) <-chan struct{} {
 	done := make(chan struct{})
+	p.endTime = time.Now().Add(PhaseDuration)
 
 	go func() {
-		defer close(done)
+		defer func() {
+			close(done)
+		}()
 
 		for {
 			select {
@@ -42,6 +53,8 @@ func (p *JoinPhase) Run(m *Match) <-chan struct{} {
 					log.Println("JoinPhase capacity reached")
 					return
 				}
+			case <-time.After(PhaseDuration):
+				return
 			}
 		}
 	}()

@@ -22,9 +22,10 @@ type Message struct {
 
 //easyjson:json
 type MatchState struct {
-	Phase    string           `json:"phase"`
-	Question *models.Question `json:"question,omitempty"`
-	Scores   Scores           `json:"scores,omitempty"`
+	Phase       string           `json:"phase"`
+	PhaseMsLeft int              `json:"ms_left,omitempty"`
+	Question    *models.Question `json:"question,omitempty"`
+	Scores      Scores           `json:"scores,omitempty"`
 }
 
 //easyjson:json

@@ -9,6 +9,7 @@ import (
 
 	"github.com/mrap/guestimator/client"
 	"github.com/mrap/guestimator/server"
+	"github.com/mrap/guestimator/server/match"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
@@ -24,6 +25,7 @@ var matchServer *httptest.Server
 var matchServerHost string
 
 var _ = BeforeSuite(func() {
+	match.PhaseDuration = 50 * time.Millisecond
 	SetDefaultEventuallyTimeout(2 * time.Second)
 })
 

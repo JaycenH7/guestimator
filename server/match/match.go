@@ -5,6 +5,7 @@ import (
 	"math"
 	"net/http"
 	"sort"
+	"time"
 
 	"github.com/mrap/guestimator/models"
 	"github.com/olahol/melody"
@@ -74,12 +75,16 @@ func (m *Match) run() {
 
 	for phases.Size() > 0 {
 		m.CurrentPhase = phases.Next()
-		m.broadcastMatchState()
 		done := m.CurrentPhase.Run(m)
+
+		m.broadcastMatchState()
+		phaseTicker := time.NewTicker(300 * time.Millisecond)
 
 	PhaseLoop:
 		for {
 			select {
+			case <-phaseTicker.C:
+				m.broadcastMatchState()
 			case ps := <-m.playerConnect:
 				m.Sessions[ps.playerID] = ps.session
 				m.CurrentPhase.OnPlayerConnect(ps.playerID)
@@ -121,6 +126,8 @@ func (m *Match) run() {
 				break PhaseLoop
 			}
 		}
+
+		phaseTicker.Stop()
 
 		if phases.Size() == 0 {
 			if len(m.Questions) == 0 {
@@ -180,6 +187,10 @@ func (m *Match) handlePlayerMessage(s *melody.Session, inMsg []byte) {
 func (m *Match) broadcastMatchState(sessions ...*melody.Session) {
 	state := MatchState{
 		Phase: m.CurrentPhase.Label(),
+	}
+
+	if m.CurrentPhase.TimeRemaining() > 0 {
+		state.PhaseMsLeft = int(m.CurrentPhase.TimeRemaining() / time.Millisecond)
 	}
 
 	switch m.CurrentPhase.(type) {

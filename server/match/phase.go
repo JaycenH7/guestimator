@@ -1,10 +1,15 @@
 package match
 
+import "time"
+
 type Phase interface {
 	EventListener
 	Run(m *Match) <-chan struct{}
 	Label() string
+	TimeRemaining() time.Duration
 }
+
+var PhaseDuration = 2 * time.Second
 
 // PhaseQueue is a queue of phases.
 type PhaseQueue struct {

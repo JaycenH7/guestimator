@@ -3,10 +3,11 @@ package match
 import "time"
 
 type GuessResultPhase struct {
+	endTime time.Time
 }
 
 func NewGuessResultPhase() *GuessResultPhase {
-	p := new(GuessResultPhase)
+	p := &GuessResultPhase{}
 	return p
 }
 
@@ -23,14 +24,24 @@ func (p *GuessResultPhase) OnPlayerConnect(id string) {
 func (p *GuessResultPhase) OnPlayerDisconnect(id string) {
 }
 
+func (p GuessResultPhase) TimeRemaining() time.Duration {
+	return p.endTime.Sub(time.Now())
+}
+
 func (p *GuessResultPhase) Run(m *Match) <-chan struct{} {
 	done := make(chan struct{})
+	p.endTime = time.Now().Add(PhaseDuration)
 
 	go func() {
-		defer close(done)
+		defer func() {
+			close(done)
+		}()
 
 		// TODO: We should wait until all players are ready for the next phase
-		time.Sleep(500 * time.Millisecond)
+		select {
+		case <-time.After(PhaseDuration):
+			return
+		}
 	}()
 
 	return done
