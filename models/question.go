@@ -24,7 +24,7 @@ func (q Question) String() string {
 	return q.FullText
 }
 
-func (q Question) AnswerAt(pos int) (int, error) {
+func (q Question) AnswerAt(pos int) (float64, error) {
 	endPos := -1
 	for i, p := range q.Positions {
 		if p == pos && i < len(q.Positions)-1 {
@@ -34,13 +34,12 @@ func (q Question) AnswerAt(pos int) (int, error) {
 	}
 
 	if endPos == -1 {
-		return -1, errors.New(fmt.Sprintf("Could not find answer at position: %d", pos))
+		return 0.0, errors.New(fmt.Sprintf("Could not find answer at position: %d", pos))
 	}
-
-	return strconv.Atoi(q.FullText[pos : endPos+1])
+	return strconv.ParseFloat(q.FullText[pos:endPos+1], 64)
 }
 
-func (q Question) FirstAnswer() (int, error) {
+func (q Question) FirstAnswer() (float64, error) {
 	return q.AnswerAt(q.Positions[0])
 }
 

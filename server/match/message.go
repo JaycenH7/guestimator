@@ -29,8 +29,8 @@ type MatchState struct {
 
 //easyjson:json
 type Guess struct {
-	Min int `json:"min"`
-	Max int `json:"max"`
+	Min float64 `json:"min"`
+	Max float64 `json:"max"`
 }
 
 type PlayerGuess struct {

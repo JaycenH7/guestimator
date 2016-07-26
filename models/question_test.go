@@ -81,13 +81,13 @@ var _ = Describe("Question", func() {
 		It("should be able to return the first answer", func() {
 			answer, err := question.FirstAnswer()
 			Expect(err).ToNot(HaveOccurred())
-			Expect(answer).To(Equal(26))
+			Expect(answer).To(Equal(float64(26)))
 		})
 
 		It("should be able to return the second answer", func() {
 			answer, err := question.AnswerAt(19)
 			Expect(err).ToNot(HaveOccurred())
-			Expect(answer).To(Equal(2016))
+			Expect(answer).To(Equal(float64(2016)))
 		})
 	})
 

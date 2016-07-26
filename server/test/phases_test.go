@@ -154,15 +154,15 @@ var _ = Describe("Match Phases", func() {
 
 				for i, c := range clients {
 					guess := match.Guess{
-						Min: answer - i,
-						Max: answer + i,
+						Min: answer - float64(i),
+						Max: answer + float64(i),
 					}
 
 					// Last client's guess will be out of range
 					if i == len(clients)-1 {
 						guess = match.Guess{
-							Min: answer + i,
-							Max: answer - i,
+							Min: answer + float64(i),
+							Max: answer - float64(i),
 						}
 					}
 

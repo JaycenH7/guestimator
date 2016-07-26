@@ -97,7 +97,7 @@ func (m *Match) run() {
 					if playerGuess.Guess.Min > exact || playerGuess.Guess.Max < exact {
 						dist = math.MaxFloat64
 					} else {
-						dist = math.Abs(float64(exact-playerGuess.Guess.Min)) + math.Abs(float64(exact-playerGuess.Guess.Max))
+						dist = math.Abs(exact-playerGuess.Guess.Min) + math.Abs(exact-playerGuess.Guess.Max)
 					}
 					distPlayerMap[dist] = append(distPlayerMap[dist], playerID)
 					dists = append(dists, dist)
