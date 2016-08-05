@@ -20,7 +20,15 @@ Install [goose](https://bitbucket.org/liamstask/goose/) which is used to manage 
 Apply all migrations.
 
 `goose up`
+
 `goose -env test up`
+
+Install [easyjson](https://github.com/mailru/easyjson) which is used to marshal/unmarshal
+json structs.
+
+`go get github.com/mailru/easyjson/...`
+
+`go generate ./...`
 
 Use [godep](https://github.com/tools/godep) to manage dependencies.
 
@@ -28,10 +36,12 @@ Use [godep](https://github.com/tools/godep) to manage dependencies.
 
 Fetch go dependencies (vendored).
 
-`go get ./...`
+`godep restore`
 
 Install testing deps and check if your environment works by
 
 `go get github.com/onsi/ginkgo/ginkgo`
+
 `go get github.com/onsi/gomega`
+
 `ginkgo -r`
