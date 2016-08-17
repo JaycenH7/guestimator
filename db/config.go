@@ -1,14 +1,25 @@
 package db
 
-import "gopkg.in/pg.v4"
+import (
+	"gopkg.in/pg.v4"
+	"os"
+)
 
 const dbname = "guestimator"
 
-var DevDB = pg.Connect(Options("dev"))
+// dbAddr - database address
+var dbAddr = os.Getenv("DB_ADDR")
 
-func Options(env string) *pg.Options {
+// DevDB - development database
+var DevDB = pg.Connect(Options("dev", dbAddr))
+
+// Options - this is a test
+func Options(env string, addr string) *pg.Options {
 	if env == "" {
 		env = "dev"
+	}
+	if addr == "" {
+		addr = "localhost"
 	}
 
 	var opts pg.Options
@@ -17,6 +28,7 @@ func Options(env string) *pg.Options {
 	opts.User = opts.Database
 	opts.Password = opts.Database
 	opts.SSL = false
+	ops.Addr = addr
 
 	return &opts
 }
